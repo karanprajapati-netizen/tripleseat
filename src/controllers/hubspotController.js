@@ -4,7 +4,7 @@ const logger = require("../utils/logger");
 
 exports.handleWebhook = async (req, res) => {
   const startTime = Date.now();
-  
+  return res.status(400).json({ error: "test 123" });
   logger.webhook(`Deal webhook received`, {
     dealId: req.body.objectId,
     timestamp: new Date().toISOString()
