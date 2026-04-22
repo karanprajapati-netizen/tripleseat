@@ -1,0 +1,130 @@
+2026-04-21 13:07:17 [INFO] 🔐 AUTH: Authentication service initialized
+  baseURL: https://api.tripleseat.com
+  hasClientId: true
+  hasClientSecret: true
+2026-04-21 13:07:17 [INFO] 🔵 HUBSPOT: Fetching deal 208389168090
+2026-04-21 13:07:18 [INFO] 🔵 HUBSPOT: Deal retrieved successfully
+  dealId: 208389168090
+  dealName: Terri Wedzinga 
+  dealStage: 2822434791
+  tripleseatPush: true
+  closeDate: 2026-04-30T15:46:57.756Z
+  processingTime: 644ms
+2026-04-21 13:07:18 [INFO] 🔵 HUBSPOT: Fetching associated contacts for deal 208389168090
+2026-04-21 13:07:18 [INFO] 🔵 HUBSPOT: Found 1 associated contacts
+  dealId: 208389168090
+  contactIds: [
+  256412682181
+]
+  processingTime: 647ms
+2026-04-21 13:07:18 [INFO] 🔵 HUBSPOT: Fetching contact 256412682181
+  properties: [
+  "firstname",
+  "lastname",
+  "email",
+  "phone",
+  "tripleseat_push"
+]
+2026-04-21 13:07:19 [INFO] 🔵 HUBSPOT: Contact retrieved successfully
+  contactId: 256412682181
+  email: terriwedzinga@gmail.com
+  name: Terri Wedzinga
+  processingTime: 592ms
+2026-04-21 13:07:19 [INFO] 🟢 TRIPLESEAT: Creating contact for terriwedzinga@gmail.com
+  name: Terri Wedzinga
+  phone: +15198520250
+  accountId: 43553180
+2026-04-21 13:07:19 [INFO] 🔐 AUTH: Requesting new OAuth2 access token (#1)
+2026-04-21 13:07:20 [INFO] 🔐 AUTH: OAuth2 token obtained successfully
+  tokenLength: 43
+  expiresIn: 7200
+  processingTime: 854ms
+  expiresAt: 4/21/2026, 1:57:20 PM
+2026-04-21 13:07:21 [INFO] 🟢 TRIPLESEAT: Contact created successfully
+  email: terriwedzinga@gmail.com
+  tripleseatContactId: 57787551
+  processingTime: 2135ms
+2026-04-21 13:07:21 [INFO] 🟢 TRIPLESEAT: Creating event for deal: Terri Wedzinga 
+  contactId: undefined
+  dealStage: 2822434791
+  closeDate: 2026-04-30T15:46:57.756Z
+2026-04-21 13:07:21 [INFO] 🔐 AUTH: Using cached token (expires in 2999s)
+2026-04-21 13:07:22 [ERROR] Failed to create event for deal: Terri Wedzinga 
+  contactId: undefined
+  error: Request failed with status code 422
+  status: 422
+  response: {
+  "errors": {
+    "contact": [
+      "must be selected"
+    ],
+    "booking": [
+      "is invalid"
+    ]
+  }
+}
+2026-04-21 13:08:46 [INFO] AUTH: Authentication service initialized
+  baseURL: https://api.tripleseat.com
+  hasClientId: true
+  hasClientSecret: true
+2026-04-21 13:08:46 [INFO] HUBSPOT: Fetching deal 208389168090
+2026-04-21 13:08:47 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 208389168090
+  dealName: Terri Wedzinga 
+  dealStage: 2822434791
+  tripleseatPush: true
+  closeDate: 2026-04-30T15:46:57.756Z
+  processingTime: 651ms
+2026-04-21 13:08:47 [INFO] HUBSPOT: Fetching associated contacts for deal 208389168090
+2026-04-21 13:08:48 [INFO] HUBSPOT: Found 1 associated contacts
+  dealId: 208389168090
+  contactIds: [
+  256412682181
+]
+  processingTime: 639ms
+2026-04-21 13:08:48 [INFO] HUBSPOT: Fetching contact 256412682181
+  properties: [
+  "firstname",
+  "lastname",
+  "email",
+  "phone",
+  "tripleseat_push"
+]
+2026-04-21 13:08:48 [INFO] HUBSPOT: Contact retrieved successfully
+  contactId: 256412682181
+  email: terriwedzinga@gmail.com
+  name: Terri Wedzinga
+  processingTime: 579ms
+2026-04-21 13:08:48 [INFO] TRIPLESEAT: Creating contact for terriwedzinga@gmail.com
+  name: Terri Wedzinga
+  phone: +15198520250
+  accountId: 43553180
+2026-04-21 13:08:48 [INFO] AUTH: Requesting new OAuth2 access token (#1)
+2026-04-21 13:08:49 [INFO] AUTH: OAuth2 token obtained successfully
+  tokenLength: 43
+  expiresIn: 7199
+  processingTime: 940ms
+  expiresAt: 4/21/2026, 1:58:49 PM
+2026-04-21 13:08:50 [INFO] TRIPLESEAT: Contact created successfully
+  email: terriwedzinga@gmail.com
+  tripleseatContactId: 57787555
+  processingTime: 1921ms
+2026-04-21 13:08:50 [INFO] TRIPLESEAT: Creating event for deal: Terri Wedzinga 
+  contactId: undefined
+  dealStage: 2822434791
+  closeDate: 2026-04-30T15:46:57.756Z
+2026-04-21 13:08:50 [INFO] AUTH: Using cached token (expires in 2999s)
+2026-04-21 13:08:51 [ERROR] Failed to create event for deal: Terri Wedzinga 
+  contactId: undefined
+  error: Request failed with status code 422
+  status: 422
+  response: {
+  "errors": {
+    "contact": [
+      "must be selected"
+    ],
+    "booking": [
+      "is invalid"
+    ]
+  }
+}
