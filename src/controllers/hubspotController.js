@@ -5,43 +5,83 @@ const logger = require("../utils/logger");
 exports.handleWebhook = async (req, res) => {
   const startTime = Date.now();
 
+  // Handle new payload structure with deal object
+  let dealData, dealId;
+  
+  if (req.body.deal) {
+    // New payload format: { "deal": { "id": "...", "properties": {...} } }
+    dealData = req.body.deal;
+    dealId = dealData.id;
+  } else if (req.body.objectId) {
+    // Old payload format: { "objectId": "..." }
+    dealId = req.body.objectId;
+    dealData = null;
+  } else {
+    logger.error(`Invalid webhook payload structure`, {
+      body: req.body
+    });
+    return res.status(400).json({ 
+      success: false,
+      message: "Invalid webhook payload structure. Expected {deal: {id, properties}} or {objectId}"
+    });
+  }
+
   logger.webhook(`Deal webhook received`, {
-    dealId: req.body.objectId,
+    dealId,
+    hasDealData: !!dealData,
     timestamp: new Date().toISOString()
   });
 
   try {
-    const dealId = req.body.objectId;
-    
-    if (!dealId) {
-      logger.error(`No deal ID in webhook payload`);
-      return res.status(400).json({ error: "Missing deal ID" });
+    // Get deal details (from payload or API)
+    let deal;
+    if (dealData && dealData.properties) {
+      // Use deal data from webhook payload
+      deal = dealData;
+      logger.webhook(`Using deal data from webhook payload`, {
+        dealId,
+        dealName: deal.properties.dealname
+      });
+    } else {
+      // Fetch deal from HubSpot API
+      deal = await hubspot.getDeal(dealId);
+      logger.webhook(`Fetched deal from HubSpot API`, {
+        dealId,
+        dealName: deal.properties.dealname
+      });
     }
 
-    // 1. Get deal details
-    const deal = await hubspot.getDeal(dealId);
-    return res.status(200).json({ deal });
+    // Check if deal should be processed - check for "true" (not "Yes")
+    if (deal.properties.tripleseat_push !== "true") {
+      logger.webhook(`Skipping deal - tripleseat_push is not "true"`, {
+        dealId,
+        tripleseatPush: deal.properties.tripleseat_push
+      });
+      return res.status(200).json({ 
+        success: true,
+        message: `Deal skipped - tripleseat_push is "${deal.properties.tripleseat_push}" (expected "true")`,
+        dealId,
+        processed: false
+      });
+    }
+
     logger.webhook(`Processing deal: ${deal.properties.dealname}`, {
       dealId,
       dealStage: deal.properties.dealstage,
       tripleseatPush: deal.properties.tripleseat_push
     });
 
-    // Check if deal should be processed
-    if (deal.properties.tripleseat_push !== "Yes") {
-      logger.webhook(`Skipping deal - tripleseat_push is not "Yes"`, {
-        dealId,
-        tripleseatPush: deal.properties.tripleseat_push
-      });
-      return res.sendStatus(200);
-    }
-
-    // 2. Get associated contacts
+    // Get associated contacts
     const contactIds = await hubspot.getAssociatedContacts(dealId);
 
     if (!contactIds || contactIds.length === 0) {
       logger.webhook(`Skipping deal - no associated contacts found`, { dealId });
-      return res.sendStatus(200);
+      return res.status(200).json({ 
+        success: true,
+        message: `Deal skipped - no associated contacts found`,
+        dealId,
+        processed: false
+      });
     }
 
     logger.webhook(`Found ${contactIds.length} contacts to process`, {
@@ -49,7 +89,7 @@ exports.handleWebhook = async (req, res) => {
       contactIds
     });
 
-    // 3. Process each contact
+    // Process each contact
     const results = { success: 0, failed: 0, details: [] };
     
     for (let i = 0; i < contactIds.length; i++) {
@@ -112,26 +152,34 @@ exports.handleWebhook = async (req, res) => {
       processingTime: `${totalProcessingTime}ms`
     });
 
-    res.status(200).json({
-      message: "Webhook processed successfully",
+    return res.status(200).json({
+      success: true,
+      message: `Successfully processed ${results.success} contacts for deal "${deal.properties.dealname}"`,
       dealId,
+      dealName: deal.properties.dealname,
+      totalContacts: contactIds.length,
       processedContacts: results.success,
       failedContacts: results.failed,
-      processingTime: totalProcessingTime
+      processingTime: `${totalProcessingTime}ms`,
+      details: results.details
     });
 
   } catch (error) {
     const totalProcessingTime = Date.now() - startTime;
     
     logger.error(`Critical error in webhook processing`, {
+      dealId,
       error: error.message,
       stack: error.stack,
       processingTime: `${totalProcessingTime}ms`
     });
 
-    res.status(500).json({
-      error: "Internal server error",
-      message: error.message
+    return res.status(500).json({
+      success: false,
+      message: `Webhook processing failed: ${error.message}`,
+      dealId,
+      error: error.message,
+      processingTime: `${totalProcessingTime}ms`
     });
   }
 };
