@@ -4,7 +4,7 @@ const logger = require("../utils/logger");
 
 exports.handleWebhook = async (req, res) => {
   const startTime = Date.now();
-  return res.status(400).json({ error: "test 123" });
+
   logger.webhook(`Deal webhook received`, {
     dealId: req.body.objectId,
     timestamp: new Date().toISOString()
@@ -20,7 +20,7 @@ exports.handleWebhook = async (req, res) => {
 
     // 1. Get deal details
     const deal = await hubspot.getDeal(dealId);
-    
+    return res.status(200).json({ deal });
     logger.webhook(`Processing deal: ${deal.properties.dealname}`, {
       dealId,
       dealStage: deal.properties.dealstage,
