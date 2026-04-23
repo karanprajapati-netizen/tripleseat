@@ -19,7 +19,7 @@ exports.getContact = async (contactId) => {
     });
     
     const res = await axios.get(
-      `${BASE_URL}/crm/v3/objects/contacts/${contactId}?properties=firstname,lastname,email,phone,tripleseat_push`,
+      `${BASE_URL}/crm/v3/objects/contacts/${contactId}?properties=firstname,lastname,email,phone`,
       { headers }
     );
     
