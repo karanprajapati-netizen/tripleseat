@@ -5,12 +5,74 @@ const logger = require("../utils/logger");
 const BASE_URL = process.env.TRIPLESEAT_BASE_URL;
 const ACCOUNT_ID = process.env.TRIPLESEAT_ACCOUNT_ID;
 
-// Create Contact
+// Search for existing contact by email
+exports.findContactByEmail = async (email) => {
+  const startTime = Date.now();
+  
+  try {
+    logger.tripleseat(`Searching for existing contact: ${email}`, {
+      accountId: ACCOUNT_ID
+    });
+    
+    const headers = await auth.getHeaders();
+    
+    const res = await axios.get(
+      `${BASE_URL}/v1/contacts.json`,
+      { 
+        headers,
+        params: {
+          account_id: ACCOUNT_ID,
+          email: email
+        }
+      }
+    );
+
+    const processingTime = Date.now() - startTime;
+    const contacts = res.data.contacts || [];
+    
+    if (contacts.length > 0) {
+      logger.tripleseat(`Found existing contact`, {
+        email,
+        contactId: contacts[0].id,
+        totalFound: contacts.length,
+        processingTime: `${processingTime}ms`
+      });
+      return contacts[0]; // Return first match
+    }
+    
+    logger.tripleseat(`No existing contact found`, {
+      email,
+      processingTime: `${processingTime}ms`
+    });
+    return null;
+    
+  } catch (error) {
+    logger.error(`Failed to search for contact: ${email}`, {
+      error: error.message,
+      status: error.response?.status,
+      response: error.response?.data
+    });
+    throw error;
+  }
+};
+
+// Create Contact (or return existing)
 exports.createContact = async (contact) => {
   const startTime = Date.now();
   
   try {
-    logger.tripleseat(`Creating contact for ${contact.email}`, {
+    // First check if contact already exists
+    const existingContact = await exports.findContactByEmail(contact.email);
+    
+    if (existingContact) {
+      logger.tripleseat(`Using existing contact for ${contact.email}`, {
+        contactId: existingContact.id,
+        name: `${existingContact.first_name} ${existingContact.last_name}`
+      });
+      return { contact: existingContact };
+    }
+    
+    logger.tripleseat(`Creating new contact for ${contact.email}`, {
       name: `${contact.firstname} ${contact.lastname}`,
       phone: contact.phone || 'none',
       accountId: ACCOUNT_ID
