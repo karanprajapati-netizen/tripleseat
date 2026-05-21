@@ -113,18 +113,21 @@ exports.createContact = async (contact) => {
 };
 
 // Create Event
-exports.createEvent = async (deal, contactId) => {
+exports.createEvent = async (deal, contactId, hubspotDealId) => {
   const startTime = Date.now();
-  
+
   try {
     logger.tripleseat(`Creating event for deal: ${deal.dealname}`, {
       contactId,
+      hubspotDealId,
       dealStage: deal.dealstage,
-      closeDate: deal.closedate || 'none'
+      eventDate: deal.event_date || 'none',
+      closeDate: deal.closedate || 'none',
+      amount: deal.amount || 'none'
     });
-    
+
     const headers = await auth.getHeaders();
-    
+
     // Format dates as MM/DD/YYYY HH:MM AM/PM
     const formatDate = (date) => {
       const d = new Date(date);
@@ -135,7 +138,6 @@ exports.createEvent = async (deal, contactId) => {
       const minutes = String(d.getMinutes()).padStart(2, '0');
       const ampm = hours >= 12 ? 'PM' : 'AM';
       const formattedHours = hours % 12 || 12;
-      
       return `${month}/${day}/${year} ${formattedHours}:${minutes} ${ampm}`;
     };
     
@@ -163,10 +165,11 @@ exports.createEvent = async (deal, contactId) => {
       room_ids: [238254],
       booking: {
         status: "pending",
-        source: "HubSpot Integration"
+        source: "HubSpot Integration",
+        ...(deal.amount && { estimated_amount: parseFloat(deal.amount) })
       }
     };
-    
+
     const res = await axios.post(
       `${BASE_URL}/v1/events.json`,
       { event: eventData },
@@ -178,13 +181,16 @@ exports.createEvent = async (deal, contactId) => {
       eventName: eventData.name,
       tripleseatEventId: res.data.event?.id,
       eventDates: `${eventStart} - ${eventEnd}`,
+      amount: deal.amount || 'none',
+      hubspotDealId,
       processingTime: `${processingTime}ms`
     });
-    
+
     return res.data;
   } catch (error) {
     logger.error(`Failed to create event for deal: ${deal.dealname}`, {
       contactId,
+      hubspotDealId,
       error: error.message,
       status: error.response?.status,
       response: error.response?.data

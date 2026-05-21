@@ -128,3 +128,14 @@
     ]
   }
 }
+2026-04-22 19:26:39 [INFO] AUTH: Authentication service initialized
+  baseURL: https://api.tripleseat.com
+  hasClientId: true
+  hasClientSecret: true
+2026-04-22 19:26:39 [INFO] AUTH: Requesting new OAuth2 access token (#1)
+2026-04-22 19:26:41 [INFO] AUTH: OAuth2 token obtained successfully
+  tokenLength: 43
+  expiresIn: 7199
+  processingTime: 1115ms
+  expiresAt: 4/22/2026, 8:16:40 PM
+2026-04-22 19:26:41 [INFO] AUTH: Using cached token (expires in 3000s)

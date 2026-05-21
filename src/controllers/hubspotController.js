@@ -78,24 +78,51 @@ exports.handleWebhook = async (req, res) => {
 
       if (!contactIds?.length) continue;
 
+      // Check if a Tripleseat event already exists for this deal (deduplication)
+      const existingTsEventId = deal.properties.tripleseat_event_id;
+      if (existingTsEventId) {
+        logger.webhook("Skipping - Tripleseat event already exists for this deal", {
+          dealId,
+          existingTsEventId
+        });
+        continue;
+      }
+
+      // Only process the first associated contact for event creation
+      const primaryContactId = contactIds[0];
+      let tsEventId = null;
+
       for (const contactId of contactIds) {
         try {
           const contact = await hubspot.getContact(contactId);
           const tsContact = await tripleseat.createContact(contact.properties);
-          const tsEvent = await tripleseat.createEvent(deal.properties, tsContact.contact?.id);
           logger.webhook("Contact pushed", {
             contactId,
             tsId: tsContact.contact?.id
           });
-          logger.webhook("Event created", {
-            eventId: tsEvent.event?.id
-          });
+
+          // Create the event once using the primary contact
+          if (contactId === primaryContactId) {
+            const tsEvent = await tripleseat.createEvent(deal.properties, tsContact.contact?.id, dealId);
+            tsEventId = tsEvent.event?.id;
+            logger.webhook("Event created", { eventId: tsEventId });
+          }
 
         } catch (err) {
           logger.error("Contact failed", {
             contactId,
             error: err.message
           });
+        }
+      }
+
+      // Write the Tripleseat event ID back to the HubSpot deal for cross-system linking
+      if (tsEventId) {
+        try {
+          await hubspot.updateDeal(dealId, { tripleseat_event_id: String(tsEventId) });
+          logger.webhook("Tripleseat event ID saved to HubSpot deal", { dealId, tsEventId });
+        } catch (err) {
+          logger.error("Failed to save tripleseat_event_id to deal", { dealId, error: err.message });
         }
       }
     }

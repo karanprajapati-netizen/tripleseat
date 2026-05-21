@@ -12,14 +12,14 @@ const headers = {
 // Get Contact
 exports.getContact = async (contactId) => {
   const startTime = Date.now();
-  
+
   try {
     logger.hubspot(`Fetching contact ${contactId}`, {
-      properties: ["firstname", "lastname", "email", "phone", "tripleseat_push"]
+      properties: ["firstname", "lastname", "email", "phone", "company", "jobtitle"]
     });
-    
+
     const res = await axios.get(
-      `${BASE_URL}/crm/v3/objects/contacts/${contactId}?properties=firstname,lastname,email,phone`,
+      `${BASE_URL}/crm/v3/objects/contacts/${contactId}?properties=firstname,lastname,email,phone,company,jobtitle`,
       { headers }
     );
     
@@ -81,10 +81,10 @@ exports.getDeal = async (dealId) => {
     logger.hubspot(`Fetching deal ${dealId}`);
     
     const res = await axios.get(
-      `${BASE_URL}/crm/v3/objects/deals/${dealId}?properties=dealname,dealstage,tripleseat_push,closedate,amount`,
+      `${BASE_URL}/crm/v3/objects/deals/${dealId}?properties=dealname,dealstage,tripleseat_push,closedate,amount,tripleseat_event_id`,
       { headers }
     );
-    
+
     const processingTime = Date.now() - startTime;
     logger.hubspot(`Deal retrieved successfully`, {
       dealId,
@@ -92,6 +92,9 @@ exports.getDeal = async (dealId) => {
       dealStage: res.data.properties.dealstage,
       tripleseatPush: res.data.properties.tripleseat_push,
       closeDate: res.data.properties.closedate,
+      eventDate: res.data.properties.event_date,
+      amount: res.data.properties.amount,
+      tripleseatEventId: res.data.properties.tripleseat_event_id,
       processingTime: `${processingTime}ms`
     });
     
@@ -100,6 +103,84 @@ exports.getDeal = async (dealId) => {
     logger.error(`Failed to fetch deal ${dealId}`, {
       error: error.message,
       status: error.response?.status
+    });
+    throw error;
+  }
+};
+
+// Find a HubSpot deal by its linked Tripleseat event ID (reverse lookup for inbound TS webhooks)
+exports.findDealByTripleseatEventId = async (tripleseatEventId) => {
+  const startTime = Date.now();
+
+  try {
+    logger.hubspot(`Searching deal by tripleseat_event_id: ${tripleseatEventId}`);
+
+    const res = await axios.post(
+      `${BASE_URL}/crm/v3/objects/deals/search`,
+      {
+        filterGroups: [{
+          filters: [{
+            propertyName: "tripleseat_event_id",
+            operator: "EQ",
+            value: String(tripleseatEventId)
+          }]
+        }],
+        properties: ["dealname", "dealstage", "amount", "tripleseat_event_id"]
+      },
+      { headers }
+    );
+
+    const deals = res.data.results || [];
+    const processingTime = Date.now() - startTime;
+
+    if (deals.length === 0) {
+      logger.hubspot(`No deal found for tripleseat_event_id: ${tripleseatEventId}`, { processingTime: `${processingTime}ms` });
+      return null;
+    }
+
+    logger.hubspot(`Deal found for tripleseat_event_id: ${tripleseatEventId}`, {
+      dealId: deals[0].id,
+      dealName: deals[0].properties.dealname,
+      processingTime: `${processingTime}ms`
+    });
+
+    return deals[0];
+  } catch (error) {
+    logger.error(`Failed to search deal by tripleseat_event_id: ${tripleseatEventId}`, {
+      error: error.message,
+      status: error.response?.status,
+      response: error.response?.data
+    });
+    throw error;
+  }
+};
+
+// Update Deal properties (used to write back Tripleseat IDs)
+exports.updateDeal = async (dealId, properties) => {
+  const startTime = Date.now();
+
+  try {
+    logger.hubspot(`Updating deal ${dealId}`, { properties });
+
+    const res = await axios.patch(
+      `${BASE_URL}/crm/v3/objects/deals/${dealId}`,
+      { properties },
+      { headers }
+    );
+
+    const processingTime = Date.now() - startTime;
+    logger.hubspot(`Deal updated successfully`, {
+      dealId,
+      properties,
+      processingTime: `${processingTime}ms`
+    });
+
+    return res.data;
+  } catch (error) {
+    logger.error(`Failed to update deal ${dealId}`, {
+      error: error.message,
+      status: error.response?.status,
+      response: error.response?.data
     });
     throw error;
   }
