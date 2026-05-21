@@ -38,7 +38,10 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json({ limit: '10mb' })); // Add limit and logging for large payloads
+app.use(express.json({
+  limit: '10mb',
+  verify: (req, _res, buf) => { req.rawBody = buf.toString(); }
+}));
 
 // Health check endpoint
 app.get("/health", async (req, res) => {

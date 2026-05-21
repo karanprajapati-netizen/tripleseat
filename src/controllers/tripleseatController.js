@@ -1,13 +1,40 @@
+const crypto = require("crypto");
 const hubspot = require("../services/hubspotService");
 const logger = require("../utils/logger");
 
-// TripleSeat status → HubSpot deal stage mapping
-// Override these via env vars to match your HubSpot pipeline stage IDs
+const SIGNING_KEY = process.env.TRIPLESEAT_SIGNING_KEY || "";
+
+// Verify the X-Signature header TripleSeat sends with every webhook
+// Format: "t=<timestamp>,v1=<hmac-sha256>"
+const verifySignature = (rawBody, signatureHeader) => {
+  if (!SIGNING_KEY || !signatureHeader) return false;
+
+  const parts = Object.fromEntries(
+    signatureHeader.split(",").map(p => p.split("="))
+  );
+  const timestamp = parts.t;
+  const receivedSig = parts.v1;
+  if (!timestamp || !receivedSig) return false;
+
+  const expected = crypto
+    .createHmac("sha256", SIGNING_KEY)
+    .update(`${timestamp}.${rawBody}`)
+    .digest("hex");
+
+  return crypto.timingSafeEqual(
+    Buffer.from(expected, "hex"),
+    Buffer.from(receivedSig, "hex")
+  );
+};
+
+// TripleSeat status → HubSpot deal stage ID mapping (Event Sales Pipeline)
 const TS_STATUS_TO_HS_STAGE = {
-  PROSPECT:  process.env.HS_STAGE_PROSPECT  || "appointmentscheduled",
-  TENTATIVE: process.env.HS_STAGE_TENTATIVE || "presentationscheduled",
-  DEFINITE:  process.env.HS_STAGE_DEFINITE  || "closedwon",
-  LOST:      process.env.HS_STAGE_LOST      || "closedlost"
+  PROSPECT:  process.env.HS_STAGE_PROSPECT  || "2822434791", // Qualified Lead
+  TENTATIVE: process.env.HS_STAGE_TENTATIVE || "2822434792", // Quote Sent
+  DEFINITE:  process.env.HS_STAGE_DEFINITE  || "2822434793", // Contract Sent
+  CLOSED:    process.env.HS_STAGE_CLOSED    || "2822434794", // Closed Won
+  LOST:      process.env.HS_STAGE_LOST      || "2822434795", // Closed Lost
+  WAITLIST:  process.env.HS_STAGE_WAITLIST  || "2822434791"  // Qualified Lead
 };
 
 
@@ -33,6 +60,18 @@ exports.handleWebhook = async (req, res) => {
 
   try {
     const payload = req.body;
+
+    // Verify X-Signature header (HMAC-SHA256 from TripleSeat)
+    // Only enforce when TRIPLESEAT_SIGNING_KEY is set in env
+    if (SIGNING_KEY) {
+      const sigHeader = req.headers["x-signature"] || "";
+      if (!verifySignature(req.rawBody || "", sigHeader)) {
+        logger.error("TripleSeat webhook signature verification failed", {
+          sigHeader
+        });
+        return res.status(200).json({ success: false, message: "Invalid signature" });
+      }
+    }
 
     // Log the raw payload first so we can debug field names if TripleSeat
     // sends a shape different from what we expect

@@ -18,18 +18,23 @@ exports.findContactByEmail = async (email) => {
     
     const res = await axios.get(
       `${BASE_URL}/v1/contacts.json`,
-      { 
+      {
         headers,
         params: {
           account_id: ACCOUNT_ID,
-          email: email
+          search_query: email
         }
       }
     );
 
     const processingTime = Date.now() - startTime;
-    const contacts = res.data.contacts || [];
-    
+
+    // TripleSeat returns fuzzy search results so filter by exact email match
+    const allContacts = res.data.contacts || [];
+    const contacts = allContacts.filter(c =>
+      c.email_addresses?.some(e => e.address?.toLowerCase() === email.toLowerCase())
+    );
+
     if (contacts.length > 0) {
       logger.tripleseat(`Found existing contact`, {
         email,
@@ -37,7 +42,7 @@ exports.findContactByEmail = async (email) => {
         totalFound: contacts.length,
         processingTime: `${processingTime}ms`
       });
-      return contacts[0]; // Return first match
+      return contacts[0];
     }
     
     logger.tripleseat(`No existing contact found`, {
@@ -83,9 +88,9 @@ exports.createContact = async (contact) => {
     const contactData = {
       first_name: contact.firstname || "",
       last_name: contact.lastname || "",
-      email: contact.email,
-      phone_number: contact.phone || "",
-      account_id: ACCOUNT_ID
+      account_id: ACCOUNT_ID,
+      email_addresses: [{ address: contact.email, label: "Work" }],
+      phone_numbers: contact.phone ? [{ number: contact.phone, label: "Work" }] : []
     };
     
     const res = await axios.post(
@@ -121,7 +126,7 @@ exports.createEvent = async (deal, contactId, hubspotDealId) => {
       contactId,
       hubspotDealId,
       dealStage: deal.dealstage,
-      eventDate: deal.event_date || 'none',
+      eventDate: deal.closedate || 'none',
       closeDate: deal.closedate || 'none',
       amount: deal.amount || 'none'
     });
@@ -164,11 +169,21 @@ exports.createEvent = async (deal, contactId, hubspotDealId) => {
       location_id: 20271,
       room_ids: [238254],
       booking: {
-        status: "pending",
-        source: "HubSpot Integration",
-        ...(deal.amount && { estimated_amount: parseFloat(deal.amount) })
+        status: mapDealStageToEventStatus(deal.dealstage).toLowerCase(),
+        source: "HubSpot Integration"
       }
     };
+    logger.tripleseat(`Event data prepared`, {
+      eventName: eventData.name,
+      eventDates: `${eventStart} - ${eventEnd}`,
+      amount: deal.amount || 'none',
+      bookingStatus: eventData.booking.status,
+      bookingSource: eventData.booking.source,
+      locationId: eventData.location_id,
+      roomIds: eventData.room_ids,
+      accountId: eventData.account_id,
+      hubspotDealId
+    });
 
     const res = await axios.post(
       `${BASE_URL}/v1/events.json`,
@@ -199,19 +214,18 @@ exports.createEvent = async (deal, contactId, hubspotDealId) => {
   }
 };
 
-// Helper function to map HubSpot deal stages to Tripleseat event statuses
+// Helper function to map HubSpot deal stage IDs (Event Sales Pipeline) to Tripleseat event statuses
 function mapDealStageToEventStatus(dealStage) {
   const statusMap = {
-    'open': 'PROSPECT',
-    'appointment scheduled': 'TENTATIVE', 
-    'qualified to buy': 'DEFINITE',
-    'presentation scheduled': 'TENTATIVE',
-    'decision maker bought-in': 'DEFINITE',
-    'contract sent': 'DEFINITE',
-    'closed won': 'DEFINITE',
-    'closed lost': 'LOST',
-    'default': 'PROSPECT'
+    '2822434791': 'PROSPECT',   // Qualified Lead
+    '2822424509': 'PROSPECT',   // Tour Booked
+    '2847159289': 'TENTATIVE',  // Tour Complete
+    '2847160250': 'TENTATIVE',  // Preparing Proposal
+    '2822434792': 'TENTATIVE',  // Quote Sent
+    '2822434793': 'DEFINITE',   // Contract Sent
+    '2822434794': 'CLOSED',     // Closed Won
+    '2822434795': 'LOST'        // Closed Lost
   };
-  
-  return statusMap[dealStage?.toLowerCase()] || statusMap['default'];
+
+  return statusMap[dealStage] || 'PROSPECT';
 }
