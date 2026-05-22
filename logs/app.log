@@ -643,3 +643,96 @@
   "tripleseat_event_id": "59938497"
 }
   processingTime: 767ms
+2026-05-21 17:20:26 [INFO] AUTH: Authentication service initialized
+  baseURL: https://api.tripleseat.com
+  hasClientId: true
+  hasClientSecret: true
+2026-05-21 17:20:26 [INFO] HUBSPOT: Fetching deal 210932483059
+2026-05-21 17:20:27 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 210932483059
+  dealName: Developer Testing deal 3
+  dealStage: 2822434791
+  tripleseatPush: true
+  closeDate: 2026-05-25T11:37:36.777Z
+  eventDate: undefined
+  amount: 4670.09
+  tripleseatEventId: 59939044
+  processingTime: 1147ms
+2026-05-21 17:20:27 [INFO] HUBSPOT: Fetching associated contacts for deal 210932483059
+2026-05-21 17:20:28 [INFO] HUBSPOT: Found 1 associated contacts
+  dealId: 210932483059
+  contactIds: [
+  256416035792
+]
+  processingTime: 802ms
+2026-05-21 17:20:28 [INFO] HUBSPOT: Fetching contact 256416035792
+  properties: [
+  "firstname",
+  "lastname",
+  "email",
+  "phone",
+  "company",
+  "jobtitle"
+]
+2026-05-21 17:20:28 [INFO] HUBSPOT: Contact retrieved successfully
+  contactId: 256416035792
+  email: developer123@gmail.com
+  name: Developer test
+  processingTime: 708ms
+2026-05-21 17:20:28 [INFO] TRIPLESEAT: Searching for existing contact: developer123@gmail.com
+  accountId: 43553180
+2026-05-21 17:20:28 [INFO] AUTH: Requesting new OAuth2 access token (#1)
+2026-05-21 17:20:30 [INFO] AUTH: OAuth2 token obtained successfully
+  tokenLength: 43
+  expiresIn: 7199
+  processingTime: 985ms
+  expiresAt: 5/21/2026, 6:10:29 PM
+2026-05-21 17:20:31 [INFO] TRIPLESEAT: No existing contact found
+  email: developer123@gmail.com
+  processingTime: 2629ms
+2026-05-21 17:20:31 [INFO] TRIPLESEAT: Creating new contact for developer123@gmail.com
+  name: Developer test
+  phone: +15222565956
+  accountId: 43553180
+2026-05-21 17:20:31 [INFO] AUTH: Using cached token (expires in 2998s)
+2026-05-21 17:20:32 [INFO] TRIPLESEAT: Contact created successfully
+  email: developer123@gmail.com
+  tripleseatContactId: 58635265
+  processingTime: 3503ms
+2026-05-21 17:20:32 [INFO] TRIPLESEAT: Creating event for deal: Developer Testing deal 3
+  contactId: 58635265
+  hubspotDealId: 210932483059
+  dealStage: 2822434791
+  eventDate: 2026-05-25T11:37:36.777Z
+  closeDate: 2026-05-25T11:37:36.777Z
+  amount: 4670.09
+2026-05-21 17:20:32 [INFO] AUTH: Using cached token (expires in 2997s)
+2026-05-21 17:20:32 [INFO] TRIPLESEAT: Event data prepared
+  eventName: Developer Testing deal 3
+  eventDates: 05/25/2026 5:07 PM - 05/25/2026 8:07 PM
+  rentalFee: none
+  bookingStatus: prospect
+  bookingSource: HubSpot Integration
+  locationId: 20271
+  roomIds: [
+  238254
+]
+  accountId: 43553180
+  hubspotDealId: 210932483059
+2026-05-21 17:20:33 [INFO] TRIPLESEAT: Event created successfully
+  eventName: Developer Testing deal 3
+  tripleseatEventId: 59939149
+  eventDates: 05/25/2026 5:07 PM - 05/25/2026 8:07 PM
+  amount: 4670.09
+  hubspotDealId: 210932483059
+  processingTime: 1185ms
+2026-05-21 17:20:33 [INFO] HUBSPOT: Updating deal 210932483059
+  properties: {
+  "tripleseat_event_id": "59939149"
+}
+2026-05-21 17:20:34 [INFO] HUBSPOT: Deal updated successfully
+  dealId: 210932483059
+  properties: {
+  "tripleseat_event_id": "59939149"
+}
+  processingTime: 817ms

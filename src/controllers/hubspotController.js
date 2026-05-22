@@ -78,17 +78,9 @@ exports.handleWebhook = async (req, res) => {
 
       if (!contactIds?.length) continue;
 
-      // Check if a Tripleseat event already exists for this deal (deduplication)
       const existingTsEventId = deal.properties.tripleseat_event_id;
-      if (existingTsEventId) {
-        logger.webhook("Skipping - Tripleseat event already exists for this deal", {
-          dealId,
-          existingTsEventId
-        });
-        continue;
-      }
 
-      // Only process the first associated contact for event creation
+      // Only process the primary contact (first associated)
       const primaryContactId = contactIds[0];
       let tsEventId = null;
 
@@ -101,11 +93,18 @@ exports.handleWebhook = async (req, res) => {
             tsId: tsContact.contact?.id
           });
 
-          // Create the event once using the primary contact
           if (contactId === primaryContactId) {
-            const tsEvent = await tripleseat.createEvent(deal.properties, tsContact.contact?.id, dealId);
-            tsEventId = tsEvent.event?.id;
-            logger.webhook("Event created", { eventId: tsEventId });
+            if (existingTsEventId) {
+              // Event already exists - update it with latest deal data
+              await tripleseat.updateEvent(existingTsEventId, deal.properties, tsContact.contact?.id, dealId);
+              logger.webhook("Event updated", { eventId: existingTsEventId });
+              tsEventId = existingTsEventId;
+            } else {
+              // First sync - create a new event
+              const tsEvent = await tripleseat.createEvent(deal.properties, tsContact.contact?.id, dealId);
+              tsEventId = tsEvent.event?.id;
+              logger.webhook("Event created", { eventId: tsEventId });
+            }
           }
 
         } catch (err) {
@@ -116,8 +115,8 @@ exports.handleWebhook = async (req, res) => {
         }
       }
 
-      // Write the Tripleseat event ID back to the HubSpot deal for cross-system linking
-      if (tsEventId) {
+      // Write the Tripleseat event ID back to the HubSpot deal (only needed on first create)
+      if (tsEventId && !existingTsEventId) {
         try {
           await hubspot.updateDeal(dealId, { tripleseat_event_id: String(tsEventId) });
           logger.webhook("Tripleseat event ID saved to HubSpot deal", { dealId, tsEventId });

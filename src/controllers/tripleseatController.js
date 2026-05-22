@@ -38,22 +38,6 @@ const TS_STATUS_TO_HS_STAGE = {
 };
 
 
-// Extract the best available booking amount from the payload
-const extractAmount = (bookings = []) => {
-  const activeBookings = bookings.filter(
-    (b) => b.status !== "cancelled" && b.status !== "lost"
-  );
-  if (activeBookings.length === 0) return null;
-
-  const total = activeBookings.reduce((sum, b) => {
-    const amount = parseFloat(
-      b.estimated_amount ?? b.total_amount ?? b.subtotal ?? 0
-    );
-    return sum + amount;
-  }, 0);
-
-  return total > 0 ? total : null;
-};
 
 exports.handleWebhook = async (req, res) => {
   const startTime = Date.now();
@@ -122,17 +106,19 @@ exports.handleWebhook = async (req, res) => {
 
     // --------------------------------------------------
     // CR-01: AMOUNT SYNC
-    // Triggered by: Update Booking (payload includes bookings because
-    // "Include Event Payment and Line Item Information" is checked)
+    // Reads grand_total from the event payload and syncs to HubSpot deal amount
     // --------------------------------------------------
-    const bookings = eventData.bookings || [];
-    const amount = extractAmount(bookings);
-    if (amount !== null) {
+    const grandTotal = eventData.grand_total != null ? parseFloat(eventData.grand_total) : null;
+    logger.tripleseat("grand_total from TripleSeat payload", {
+      grandTotal,
+      dealId
+    });
+    if (grandTotal !== null && grandTotal > 0) {
       const currentAmount = parseFloat(deal.properties?.amount || 0);
-      if (amount !== currentAmount) {
-        updates.amount = String(amount);
-        logger.tripleseat("Syncing booking amount to HubSpot", {
-          amount,
+      if (grandTotal !== currentAmount) {
+        updates.amount = String(grandTotal);
+        logger.tripleseat("Syncing grand_total to HubSpot deal amount", {
+          grandTotal,
           currentAmount,
           dealId
         });

@@ -81,7 +81,7 @@ exports.getDeal = async (dealId) => {
     logger.hubspot(`Fetching deal ${dealId}`);
     
     const res = await axios.get(
-      `${BASE_URL}/crm/v3/objects/deals/${dealId}?properties=dealname,dealstage,tripleseat_push,closedate,amount,tripleseat_event_id`,
+      `${BASE_URL}/crm/v3/objects/deals/${dealId}?properties=dealname,dealstage,tripleseat_push,event_date,amount,tripleseat_event_id,number_of_guests__cloned__,lead_source,event_details`,
       { headers }
     );
 
@@ -91,8 +91,9 @@ exports.getDeal = async (dealId) => {
       dealName: res.data.properties.dealname,
       dealStage: res.data.properties.dealstage,
       tripleseatPush: res.data.properties.tripleseat_push,
-      closeDate: res.data.properties.closedate,
       eventDate: res.data.properties.event_date,
+      guestCount: res.data.properties.number_of_guests__cloned__,
+      leadSource: res.data.properties.lead_source,
       amount: res.data.properties.amount,
       tripleseatEventId: res.data.properties.tripleseat_event_id,
       processingTime: `${processingTime}ms`

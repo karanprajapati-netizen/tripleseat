@@ -117,6 +117,87 @@ exports.createContact = async (contact) => {
   }
 };
 
+// Format datetime as MM/DD/YYYY HH:MM AM/PM (TripleSeat expected format)
+function formatDateTime(date) {
+  const d = new Date(date);
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const year = d.getFullYear();
+  const hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const formattedHours = hours % 12 || 12;
+  return `${month}/${day}/${year} ${formattedHours}:${minutes} ${ampm}`;
+}
+
+// Format date-only as MM/DD/YYYY (TripleSeat date picker format)
+function formatDateOnly(date) {
+  const d = new Date(date);
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${month}/${day}/${year}`;
+}
+
+// Build the TripleSeat event payload from a HubSpot deal
+function buildEventData(deal, contactId) {
+  // event_date is date-only from HubSpot; use current time for start, +1hr for end
+  const now = new Date();
+  const endTime = new Date(now.getTime() + 60 * 60 * 1000);
+
+  let eventStart, eventEnd, tsEventDate;
+
+  if (deal.event_date) {
+    // Parse the date portion from HubSpot, combine with current wall-clock time
+    const datePart = new Date(deal.event_date);
+    const start = new Date(
+      datePart.getUTCFullYear(),
+      datePart.getUTCMonth(),
+      datePart.getUTCDate(),
+      now.getHours(),
+      now.getMinutes(),
+      0
+    );
+    const end = new Date(start.getTime() + 60 * 60 * 1000);
+
+    tsEventDate = formatDateOnly(datePart);
+    eventStart = formatDateTime(start);
+    eventEnd = formatDateTime(end);
+  } else {
+    tsEventDate = formatDateOnly(now);
+    eventStart = formatDateTime(now);
+    eventEnd = formatDateTime(endTime);
+  }
+
+  const dealAmount = deal.amount ? parseFloat(deal.amount) : null;
+  const guestCount = deal.number_of_guests__cloned__ ? parseInt(deal.number_of_guests__cloned__) : null;
+  const leadSources = deal.lead_source ? [deal.lead_source] : [];
+
+  return {
+    eventStart,
+    eventEnd,
+    payload: {
+      name: deal.dealname || "Event from HubSpot",
+      status: mapDealStageToEventStatus(deal.dealstage),
+      contact_id: contactId,
+      account_id: parseInt(ACCOUNT_ID),
+      event_date: tsEventDate,
+      event_start: eventStart,
+      event_end: eventEnd,
+      location_id: 20271,
+      room_ids: [238254],
+      description: deal.event_details || "",
+      ...(dealAmount ? { actual_amount: dealAmount } : {}),
+      ...(guestCount ? { guest_count: guestCount } : {}),
+      ...(leadSources.length ? { selected_lead_sources: leadSources } : {}),
+      booking: {
+        status: mapDealStageToEventStatus(deal.dealstage).toLowerCase(),
+        source: "HubSpot Integration"
+      }
+    }
+  };
+}
+
 // Create Event
 exports.createEvent = async (deal, contactId, hubspotDealId) => {
   const startTime = Date.now();
@@ -126,77 +207,27 @@ exports.createEvent = async (deal, contactId, hubspotDealId) => {
       contactId,
       hubspotDealId,
       dealStage: deal.dealstage,
-      eventDate: deal.closedate || 'none',
-      closeDate: deal.closedate || 'none',
+      eventDate: deal.event_date || 'none',
+      guestCount: deal.number_of_guests__cloned__ || 'none',
+      leadSource: deal.lead_source || 'none',
       amount: deal.amount || 'none'
     });
 
     const headers = await auth.getHeaders();
-
-    // Format dates as MM/DD/YYYY HH:MM AM/PM
-    const formatDate = (date) => {
-      const d = new Date(date);
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      const year = d.getFullYear();
-      const hours = d.getHours();
-      const minutes = String(d.getMinutes()).padStart(2, '0');
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      const formattedHours = hours % 12 || 12;
-      return `${month}/${day}/${year} ${formattedHours}:${minutes} ${ampm}`;
-    };
-    
-    // Use deal close date if available, otherwise default to today 6PM-9PM
-    let eventStart, eventEnd;
-    if (deal.closedate) {
-      const closeDate = new Date(deal.closedate);
-      eventStart = formatDate(closeDate);
-      eventEnd = formatDate(new Date(closeDate.getTime() + 3 * 60 * 60 * 1000)); // +3 hours
-    } else {
-      const today = new Date();
-      today.setHours(18, 0, 0, 0); // 6:00 PM today
-      eventStart = formatDate(today);
-      eventEnd = formatDate(new Date(today.getTime() + 3 * 60 * 60 * 1000)); // 9:00 PM today
-    }
-    
-    const eventData = {
-      name: deal.dealname || "Event from HubSpot",
-      status: mapDealStageToEventStatus(deal.dealstage),
-      contact_id: contactId,
-      account_id: parseInt(ACCOUNT_ID),
-      event_start: eventStart,
-      event_end: eventEnd,
-      location_id: 20271,
-      room_ids: [238254],
-      booking: {
-        status: mapDealStageToEventStatus(deal.dealstage).toLowerCase(),
-        source: "HubSpot Integration"
-      }
-    };
-    logger.tripleseat(`Event data prepared`, {
-      eventName: eventData.name,
-      eventDates: `${eventStart} - ${eventEnd}`,
-      amount: deal.amount || 'none',
-      bookingStatus: eventData.booking.status,
-      bookingSource: eventData.booking.source,
-      locationId: eventData.location_id,
-      roomIds: eventData.room_ids,
-      accountId: eventData.account_id,
-      hubspotDealId
-    });
+    const { eventStart, eventEnd, payload } = buildEventData(deal, contactId);
 
     const res = await axios.post(
       `${BASE_URL}/v1/events.json`,
-      { event: eventData },
+      { event: payload },
       { headers }
     );
 
     const processingTime = Date.now() - startTime;
     logger.tripleseat(`Event created successfully`, {
-      eventName: eventData.name,
+      eventName: payload.name,
       tripleseatEventId: res.data.event?.id,
       eventDates: `${eventStart} - ${eventEnd}`,
-      amount: deal.amount || 'none',
+      grandTotal: payload.actual_amount || 'none',
       hubspotDealId,
       processingTime: `${processingTime}ms`
     });
@@ -214,18 +245,65 @@ exports.createEvent = async (deal, contactId, hubspotDealId) => {
   }
 };
 
+// Update existing TripleSeat event from updated HubSpot deal
+exports.updateEvent = async (tsEventId, deal, contactId, hubspotDealId) => {
+  const startTime = Date.now();
+
+  try {
+    logger.tripleseat(`Updating event ${tsEventId} for deal: ${deal.dealname}`, {
+      contactId,
+      hubspotDealId,
+      dealStage: deal.dealstage,
+      eventDate: deal.event_date || 'none',
+      guestCount: deal.number_of_guests__cloned__ || 'none',
+      leadSource: deal.lead_source || 'none',
+      amount: deal.amount || 'none'
+    });
+
+    const headers = await auth.getHeaders();
+    const { eventStart, eventEnd, payload } = buildEventData(deal, contactId);
+
+    const res = await axios.put(
+      `${BASE_URL}/v1/events/${tsEventId}.json`,
+      { event: payload },
+      { headers }
+    );
+
+    const processingTime = Date.now() - startTime;
+    logger.tripleseat(`Event updated successfully`, {
+      eventName: payload.name,
+      tripleseatEventId: tsEventId,
+      eventDates: `${eventStart} - ${eventEnd}`,
+      grandTotal: payload.actual_amount || 'none',
+      hubspotDealId,
+      processingTime: `${processingTime}ms`
+    });
+
+    return res.data;
+  } catch (error) {
+    logger.error(`Failed to update event ${tsEventId} for deal: ${deal.dealname}`, {
+      contactId,
+      hubspotDealId,
+      error: error.message,
+      status: error.response?.status,
+      response: error.response?.data
+    });
+    throw error;
+  }
+};
+
 // Helper function to map HubSpot deal stage IDs (Event Sales Pipeline) to Tripleseat event statuses
 function mapDealStageToEventStatus(dealStage) {
   const statusMap = {
-    '2822434791': 'PROSPECT',   // Qualified Lead
-    '2822424509': 'PROSPECT',   // Tour Booked
+    '2822434791': 'TENTATIVE',  // Qualified Lead
+    '2822424509': 'TENTATIVE',  // Tour Booked
     '2847159289': 'TENTATIVE',  // Tour Complete
     '2847160250': 'TENTATIVE',  // Preparing Proposal
     '2822434792': 'TENTATIVE',  // Quote Sent
-    '2822434793': 'DEFINITE',   // Contract Sent
-    '2822434794': 'CLOSED',     // Closed Won
+    '2822434793': 'TENTATIVE',  // Contract Sent
+    '2822434794': 'DEFINITE',   // Closed Won (deposit received)
     '2822434795': 'LOST'        // Closed Lost
   };
 
-  return statusMap[dealStage] || 'PROSPECT';
+  return statusMap[dealStage] || 'TENTATIVE';
 }

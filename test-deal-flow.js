@@ -7,7 +7,7 @@ async function testDealFlow() {
     console.log("Testing deal-based webhook flow...");
     
     // Test with a sample deal ID (you'll need to replace this with a real deal ID)
-    const sampleDealId = "210990186448"; // Replace with actual deal ID
+    const sampleDealId = "210932483059"; // Replace with actual deal ID
     
     console.log(`1. Fetching deal: ${sampleDealId}`);
     const deal = await hubspot.getDeal(sampleDealId);
