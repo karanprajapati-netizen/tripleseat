@@ -126,7 +126,7 @@ exports.findDealByTripleseatEventId = async (tripleseatEventId) => {
             value: String(tripleseatEventId)
           }]
         }],
-        properties: ["dealname", "dealstage", "amount", "tripleseat_event_id"]
+        properties: ["dealname", "dealstage", "amount", "tripleseat_event_id", "event_date", "number_of_guests__cloned__", "event_details"]
       },
       { headers }
     );

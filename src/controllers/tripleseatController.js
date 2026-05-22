@@ -30,9 +30,9 @@ const verifySignature = (rawBody, signatureHeader) => {
 // TripleSeat status → HubSpot deal stage ID mapping (Event Sales Pipeline)
 const TS_STATUS_TO_HS_STAGE = {
   PROSPECT:  process.env.HS_STAGE_PROSPECT  || "2822434791", // Qualified Lead
-  TENTATIVE: process.env.HS_STAGE_TENTATIVE || "2822434792", // Quote Sent
-  DEFINITE:  process.env.HS_STAGE_DEFINITE  || "2822434793", // Contract Sent
-  CLOSED:    process.env.HS_STAGE_CLOSED    || "2822434794", // Closed Won
+  TENTATIVE: process.env.HS_STAGE_TENTATIVE || "2822434793", // Contract Sent (highest pre-deposit stage)
+  DEFINITE:  process.env.HS_STAGE_DEFINITE  || "2822434794", // Closed Won (deposit received)
+  CLOSED:    process.env.HS_STAGE_CLOSED    || "2822434794", // Closed Won (final numbers updated)
   LOST:      process.env.HS_STAGE_LOST      || "2822434795", // Closed Lost
   WAITLIST:  process.env.HS_STAGE_WAITLIST  || "2822434791"  // Qualified Lead
 };
@@ -57,8 +57,7 @@ exports.handleWebhook = async (req, res) => {
       }
     }
 
-    // Log the raw payload first so we can debug field names if TripleSeat
-    // sends a shape different from what we expect
+    // Log the full raw payload so we can verify exact field names from TripleSeat
     logger.tripleseat("TripleSeat webhook received", {
       rawPayload: JSON.stringify(payload).substring(0, 800)
     });
@@ -87,41 +86,74 @@ exports.handleWebhook = async (req, res) => {
     const updates = {};
 
     // --------------------------------------------------
-    // CR-02: STATUS SYNC
-    // Triggered by: Status Change Event, Status Change Booking
+    // STATUS SYNC
+    // Triggered by: Status Change Event, Update Event
     // --------------------------------------------------
     const tsStatus = (eventData.status || "").toUpperCase();
     if (tsStatus && TS_STATUS_TO_HS_STAGE[tsStatus]) {
       const mappedStage = TS_STATUS_TO_HS_STAGE[tsStatus];
-      // Only update if the stage is actually changing
       if (deal.properties?.dealstage !== mappedStage) {
         updates.dealstage = mappedStage;
-        logger.tripleseat("Mapping TripleSeat status to HubSpot stage", {
-          tsStatus,
-          mappedStage,
-          dealId
-        });
+        logger.tripleseat("Mapping TripleSeat status to HubSpot stage", { tsStatus, mappedStage, dealId });
       }
     }
 
     // --------------------------------------------------
-    // CR-01: AMOUNT SYNC
-    // Reads grand_total from the event payload and syncs to HubSpot deal amount
+    // AMOUNT SYNC  (actual_amount → HubSpot amount)
+    // Triggered by: Update Event
     // --------------------------------------------------
-    const grandTotal = eventData.grand_total != null ? parseFloat(eventData.grand_total) : null;
-    logger.tripleseat("grand_total from TripleSeat payload", {
-      grandTotal,
-      dealId
-    });
-    if (grandTotal !== null && grandTotal > 0) {
+    const actualAmount = eventData.actual_amount != null ? parseFloat(eventData.actual_amount) : null;
+    if (actualAmount !== null && actualAmount > 0) {
       const currentAmount = parseFloat(deal.properties?.amount || 0);
-      if (grandTotal !== currentAmount) {
-        updates.amount = String(grandTotal);
-        logger.tripleseat("Syncing grand_total to HubSpot deal amount", {
-          grandTotal,
-          currentAmount,
-          dealId
-        });
+      if (actualAmount !== currentAmount) {
+        updates.amount = String(actualAmount);
+        logger.tripleseat("Syncing actual_amount to HubSpot amount", { actualAmount, currentAmount, dealId });
+      }
+    }
+
+    // --------------------------------------------------
+    // GUEST COUNT SYNC  (guest_count → number_of_guests__cloned__)
+    // Triggered by: Update Event, Change Event Guest Counts
+    // --------------------------------------------------
+    const guestCount = eventData.guest_count != null ? parseInt(eventData.guest_count) : null;
+    if (guestCount !== null) {
+      const currentGuests = parseInt(deal.properties?.number_of_guests__cloned__ || 0);
+      if (guestCount !== currentGuests) {
+        updates.number_of_guests__cloned__ = String(guestCount);
+        logger.tripleseat("Syncing guest_count to HubSpot", { guestCount, currentGuests, dealId });
+      }
+    }
+
+    // --------------------------------------------------
+    // EVENT DATE SYNC  (event_date → HubSpot event_date)
+    // Triggered by: Update Event, Change Event Datetime
+    // --------------------------------------------------
+    const tsEventDate = eventData.event_date || null;
+    if (tsEventDate) {
+      // TripleSeat sends MM/DD/YYYY; HubSpot date fields expect midnight UTC as ms timestamp
+      const parsed = new Date(tsEventDate);
+      if (!isNaN(parsed)) {
+        const midnightUtc = Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate());
+        const currentEventDate = deal.properties?.event_date
+          ? new Date(deal.properties.event_date).getTime()
+          : null;
+        if (midnightUtc !== currentEventDate) {
+          updates.event_date = String(midnightUtc);
+          logger.tripleseat("Syncing event_date to HubSpot", { tsEventDate, midnightUtc, dealId });
+        }
+      }
+    }
+
+    // --------------------------------------------------
+    // DESCRIPTION SYNC  (description → event_details)
+    // Triggered by: Update Event
+    // --------------------------------------------------
+    const tsDescription = eventData.description != null ? String(eventData.description) : null;
+    if (tsDescription !== null) {
+      const currentDescription = deal.properties?.event_details || "";
+      if (tsDescription !== currentDescription) {
+        updates.event_details = tsDescription;
+        logger.tripleseat("Syncing description to HubSpot event_details", { dealId });
       }
     }
 
