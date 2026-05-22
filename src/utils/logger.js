@@ -41,37 +41,39 @@ const consoleFormat = format.combine(
   })
 );
 
-// Create the logger with single file output
+const isProduction = process.env.NODE_ENV === "production";
+
+// Always log to stdout so Cloud Run / any hosted platform captures output.
+// In production use the human-readable format (no color codes for log aggregators).
+// In development use the colorized console format.
 const logger = createLogger({
   level: process.env.LOG_LEVEL || "info",
-  format: humanReadableFormat,
   transports: [
-    // Single main log file
-    new transports.File({
-      filename: path.join(process.cwd(), "logs", "app.log"),
-      maxsize: 10485760, // 10MB
-      maxFiles: 5
+    new transports.Console({
+      format: isProduction ? humanReadableFormat : consoleFormat
     })
   ],
-  
-  // Handle exceptions and rejections
+
   exceptionHandlers: [
-    new transports.File({
-      filename: path.join(process.cwd(), "logs", "app.log")
+    new transports.Console({
+      format: isProduction ? humanReadableFormat : consoleFormat
     })
   ],
-  
+
   rejectionHandlers: [
-    new transports.File({
-      filename: path.join(process.cwd(), "logs", "app.log")
+    new transports.Console({
+      format: isProduction ? humanReadableFormat : consoleFormat
     })
   ]
 });
 
-// Add console transport for development
-if (process.env.NODE_ENV !== "production") {
-  logger.add(new transports.Console({
-    format: consoleFormat
+// Also write to file when running locally (not in production)
+if (!isProduction) {
+  logger.add(new transports.File({
+    filename: path.join(process.cwd(), "logs", "app.log"),
+    format: humanReadableFormat,
+    maxsize: 10485760, // 10MB
+    maxFiles: 5
   }));
 }
 

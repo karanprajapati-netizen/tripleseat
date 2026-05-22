@@ -64,8 +64,11 @@ exports.handleWebhook = async (req, res) => {
 
     // TripleSeat can wrap the data under an "event" key or send it flat
     const eventData = payload.event ?? payload;
-
+    logger.tripleseat("Parsed event data", {
+      eventData: JSON.stringify(eventData).substring(0, 800)
+    });
     const tsEventId = eventData.id;
+    logger.tripleseat("Extracted TripleSeat event ID", { tsEventId });  
     if (!tsEventId) {
       logger.error("TripleSeat webhook missing event ID", { payload });
       return res.status(200).json({ success: false, message: "Missing event ID" });
@@ -156,33 +159,33 @@ exports.handleWebhook = async (req, res) => {
         logger.tripleseat("Syncing description to HubSpot event_details", { dealId });
       }
     }
-    // --------------------------------------------------
-    // LEAD SOURCE SYNC  (selected_lead_sources → lead_source)
-    // Triggered by: Update Event
-    // --------------------------------------------------
-    const tsLeadSources = Array.isArray(eventData.selected_lead_sources)
-      ? eventData.selected_lead_sources.map(String)
-      : [];
-    const currentLeadSource = deal.properties?.lead_source || "";
-    if (tsLeadSources.length > 0) {
-      const tsLeadSourcesStr = tsLeadSources.join("|");
-      if (tsLeadSourcesStr !== currentLeadSource) {
-        updates.lead_source = tsLeadSourcesStr;
-        logger.tripleseat("Syncing selected_lead_sources to HubSpot lead_source", { tsLeadSources, dealId });
-      }
-    }
-    // --------------------------------------------------
-    // Event Name SYNC  (name → dealname)
-    // Triggered by: Update Event 
-    // --------------------------------------------------
-    const tsEventName = eventData.name != null ? String(eventData.name) : null;
-    if (tsEventName !== null) {
-      const currentName = deal.properties?.dealname || "";
-      if (tsEventName !== currentName) {
-        updates.dealname = tsEventName;
-        logger.tripleseat("Syncing event name to HubSpot dealname", { dealId });
-      } 
-    }
+    // // --------------------------------------------------
+    // // LEAD SOURCE SYNC  (selected_lead_sources → lead_source)
+    // // Triggered by: Update Event
+    // // --------------------------------------------------
+    // const tsLeadSources = Array.isArray(eventData.selected_lead_sources)
+    //   ? eventData.selected_lead_sources.map(String)
+    //   : [];
+    // const currentLeadSource = deal.properties?.lead_source || "";
+    // if (tsLeadSources.length > 0) {
+    //   const tsLeadSourcesStr = tsLeadSources.join("|");
+    //   if (tsLeadSourcesStr !== currentLeadSource) {
+    //     updates.lead_source = tsLeadSourcesStr;
+    //     logger.tripleseat("Syncing selected_lead_sources to HubSpot lead_source", { tsLeadSources, dealId });
+    //   }
+    // }
+    // // --------------------------------------------------
+    // // Event Name SYNC  (name → dealname)
+    // // Triggered by: Update Event 
+    // // --------------------------------------------------
+    // const tsEventName = eventData.name != null ? String(eventData.name) : null;
+    // if (tsEventName !== null) {
+    //   const currentName = deal.properties?.dealname || "";
+    //   if (tsEventName !== currentName) {
+    //     updates.dealname = tsEventName;
+    //     logger.tripleseat("Syncing event name to HubSpot dealname", { dealId });
+    //   } 
+    // }
 
     // --------------------------------------------------
     // APPLY UPDATES
