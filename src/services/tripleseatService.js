@@ -414,18 +414,18 @@ exports.updateEvent = async (tsEventId, deal, contactId, hubspotDealId) => {
   }
 };
 
-// Helper function to map HubSpot deal stage IDs (Event Sales Pipeline) to Tripleseat event statuses
-function mapDealStageToEventStatus(dealStage) {
-  const statusMap = {
-    '2822434791': 'TENTATIVE',  // Qualified Lead
-    '2822424509': 'TENTATIVE',  // Tour Booked
-    '2847159289': 'TENTATIVE',  // Tour Complete
-    '2847160250': 'TENTATIVE',  // Preparing Proposal
-    '2822434792': 'TENTATIVE',  // Quote Sent
-    '2822434793': 'TENTATIVE',  // Contract Sent
-    '2822434794': 'DEFINITE',   // Closed Won (deposit received)
-    '2822434795': 'LOST'        // Closed Lost
-  };
+// HubSpot deal stage ID → TripleSeat event status (Event Sales Pipeline)
+const DEAL_STAGE_TO_TS_STATUS = {
+  '2822434791': 'PROSPECT',   // Qualified Lead
+  '2822424509': 'PROSPECT',   // Tour Booked
+  '2847159289': 'PROSPECT',   // Tour Complete
+  '2847160250': 'TENTATIVE',  // Preparing Proposal
+  '2822434792': 'TENTATIVE',  // Quote Sent
+  '2822434793': 'TENTATIVE',  // Contract Sent
+  '2822434794': 'DEFINITE',   // Closed Won
+  '2822434795': 'LOST'        // Closed Lost
+};
 
-  return statusMap[dealStage] || 'TENTATIVE';
+function mapDealStageToEventStatus(dealStage) {
+  return DEAL_STAGE_TO_TS_STATUS[dealStage] || 'PROSPECT';
 }
