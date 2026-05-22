@@ -112,6 +112,22 @@ app.get("/metrics", (req, res) => {
   res.json(metrics);
 });
 
+// Temporary debug endpoint - read app.log from the running container
+app.get("/logs", (req, res) => {
+  const fs = require("fs");
+  const logPath = require("path").join(process.cwd(), "logs", "app.log");
+  const lines = parseInt(req.query.lines) || 200;
+  try {
+    const content = fs.readFileSync(logPath, "utf8");
+    const allLines = content.split("\n");
+    const tail = allLines.slice(-lines).join("\n");
+    res.setHeader("Content-Type", "text/plain");
+    res.send(tail);
+  } catch (err) {
+    res.status(404).send(`Log file not found: ${err.message}`);
+  }
+});
+
 app.use("/webhook", routes);
 
 app.get("/", (req, res) => {
