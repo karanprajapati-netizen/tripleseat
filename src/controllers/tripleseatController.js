@@ -57,15 +57,15 @@ exports.handleWebhook = async (req, res) => {
       }
     }
 
-    // Log the full raw payload so we can verify exact field names from TripleSeat
+    // Log the full raw payload to verify exact field names from TripleSeat
     logger.tripleseat("TripleSeat webhook received", {
-      rawPayload: JSON.stringify(payload).substring(0, 800)
+      rawPayload: JSON.stringify(payload)
     });
 
     // TripleSeat can wrap the data under an "event" key or send it flat
     const eventData = payload.event ?? payload;
     logger.tripleseat("Parsed event data", {
-      eventData: JSON.stringify(eventData).substring(0, 800)
+      eventData: JSON.stringify(eventData)
     });
     const tsEventId = eventData.id;
     logger.tripleseat("Extracted TripleSeat event ID", { tsEventId });  
@@ -131,9 +131,10 @@ exports.handleWebhook = async (req, res) => {
     // EVENT DATE SYNC  (event_date → HubSpot event_date)
     // Triggered by: Update Event, Change Event Datetime
     // --------------------------------------------------
-    const tsEventDate = eventData.event_date || null;
+    // Prefer event_date_iso8601 (YYYY-MM-DD) over event_date (M/DD/YYYY) - unambiguous parse
+    const tsEventDate = eventData.event_date_iso8601 || eventData.event_date || null;
     if (tsEventDate) {
-      // TripleSeat sends MM/DD/YYYY; HubSpot date fields expect midnight UTC as ms timestamp
+      // HubSpot date fields expect midnight UTC as ms timestamp
       const parsed = new Date(tsEventDate);
       if (!isNaN(parsed)) {
         const midnightUtc = Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate());
