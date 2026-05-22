@@ -15,25 +15,48 @@ exports.findContactByEmail = async (email) => {
     });
     
     const headers = await auth.getHeaders();
-    
+
     const res = await axios.get(
-      `${BASE_URL}/v1/contacts.json`,
+      `${BASE_URL}/v1/contacts/search.json`,
       {
         headers,
-        params: {
-          account_id: ACCOUNT_ID,
-          search_query: email
-        }
+        params: { query: email }
       }
     );
 
     const processingTime = Date.now() - startTime;
 
-    // TripleSeat returns fuzzy search results so filter by exact email match
-    const allContacts = res.data.contacts || [];
-    const contacts = allContacts.filter(c =>
-      c.email_addresses?.some(e => e.address?.toLowerCase() === email.toLowerCase())
-    );
+    // Log the raw response keys so we know what the search endpoint actually returns
+    logger.tripleseat(`Contact search response keys`, {
+      email,
+      topLevelKeys: Object.keys(res.data || {}),
+      isArray: Array.isArray(res.data),
+      rawPreview: JSON.stringify(res.data).substring(0, 600)
+    });
+
+    // Search endpoint may return { contacts: [] } or { results: [] } or a bare array
+    const allContacts = Array.isArray(res.data)
+      ? res.data
+      : res.data.contacts || res.data.results || [];
+
+    logger.tripleseat(`Contact search parsed`, {
+      email,
+      totalFound: allContacts.length
+    });
+
+    // TripleSeat returns fuzzy search results - filter by exact email match.
+    // Handles both array form ({ email_addresses: [{ address }] }) and
+    // flat form ({ email: "..." }) in case the search endpoint returns a trimmed shape.
+    const emailLower = email.toLowerCase();
+    const contacts = allContacts.filter(c => {
+      if (Array.isArray(c.email_addresses)) {
+        return c.email_addresses.some(e => e.address?.toLowerCase() === emailLower);
+      }
+      if (typeof c.email === 'string') {
+        return c.email.toLowerCase() === emailLower;
+      }
+      return false;
+    });
 
     if (contacts.length > 0) {
       logger.tripleseat(`Found existing contact`, {
@@ -44,7 +67,7 @@ exports.findContactByEmail = async (email) => {
       });
       return contacts[0];
     }
-    
+
     logger.tripleseat(`No existing contact found`, {
       email,
       processingTime: `${processingTime}ms`
@@ -61,30 +84,13 @@ exports.findContactByEmail = async (email) => {
   }
 };
 
-// Create Contact (or return existing)
+// Create or update contact in TripleSeat
 exports.createContact = async (contact) => {
   const startTime = Date.now();
-  
+
   try {
-    // First check if contact already exists
     const existingContact = await exports.findContactByEmail(contact.email);
-    
-    if (existingContact) {
-      logger.tripleseat(`Using existing contact for ${contact.email}`, {
-        contactId: existingContact.id,
-        name: `${existingContact.first_name} ${existingContact.last_name}`
-      });
-      return { contact: existingContact };
-    }
-    
-    logger.tripleseat(`Creating new contact for ${contact.email}`, {
-      name: `${contact.firstname} ${contact.lastname}`,
-      phone: contact.phone || 'none',
-      accountId: ACCOUNT_ID
-    });
-    
-    const headers = await auth.getHeaders();
-    
+
     const contactData = {
       first_name: contact.firstname || "",
       last_name: contact.lastname || "",
@@ -92,7 +98,36 @@ exports.createContact = async (contact) => {
       email_addresses: [{ address: contact.email, label: "Work" }],
       phone_numbers: contact.phone ? [{ number: contact.phone, label: "Work" }] : []
     };
-    
+
+    const headers = await auth.getHeaders();
+
+    if (existingContact) {
+      logger.tripleseat(`Updating existing contact for ${contact.email}`, {
+        contactId: existingContact.id
+      });
+
+      const res = await axios.put(
+        `${BASE_URL}/v1/contacts/${existingContact.id}.json`,
+        { contact: contactData },
+        { headers }
+      );
+
+      const processingTime = Date.now() - startTime;
+      logger.tripleseat(`Contact updated successfully`, {
+        email: contact.email,
+        tripleseatContactId: existingContact.id,
+        processingTime: `${processingTime}ms`
+      });
+
+      return res.data?.contact ? res.data : { contact: { ...existingContact, ...res.data } };
+    }
+
+    logger.tripleseat(`Creating new contact for ${contact.email}`, {
+      name: `${contact.firstname} ${contact.lastname}`,
+      phone: contact.phone || 'none',
+      accountId: ACCOUNT_ID
+    });
+
     const res = await axios.post(
       `${BASE_URL}/v1/contacts.json`,
       { contact: contactData },
@@ -105,10 +140,10 @@ exports.createContact = async (contact) => {
       tripleseatContactId: res.data.contact?.id,
       processingTime: `${processingTime}ms`
     });
-    
+
     return res.data;
   } catch (error) {
-    logger.error(`Failed to create contact for ${contact.email}`, {
+    logger.error(`Failed to create/update contact for ${contact.email}`, {
       error: error.message,
       status: error.response?.status,
       response: error.response?.data
@@ -190,10 +225,10 @@ function buildEventData(deal, contactId) {
       ...(dealAmount ? { actual_amount: dealAmount } : {}),
       ...(guestCount ? { guest_count: guestCount } : {}),
       ...(leadSources.length ? { selected_lead_sources: leadSources } : {}),
-      booking: {
-        status: mapDealStageToEventStatus(deal.dealstage).toLowerCase(),
-        source: "HubSpot Integration"
-      }
+      // booking: {
+      //   status: mapDealStageToEventStatus(deal.dealstage).toLowerCase(),
+      //   source: "HubSpot Integration"
+      // }
     }
   };
 }
@@ -245,6 +280,16 @@ exports.createEvent = async (deal, contactId, hubspotDealId) => {
   }
 };
 
+// Fetch an existing TripleSeat event by ID
+async function getEvent(tsEventId) {
+  const headers = await auth.getHeaders();
+  const res = await axios.get(
+    `${BASE_URL}/v1/events/${tsEventId}.json`,
+    { headers }
+  );
+  return res.data?.event || res.data;
+}
+
 // Update existing TripleSeat event from updated HubSpot deal
 exports.updateEvent = async (tsEventId, deal, contactId, hubspotDealId) => {
   const startTime = Date.now();
@@ -260,9 +305,86 @@ exports.updateEvent = async (tsEventId, deal, contactId, hubspotDealId) => {
       amount: deal.amount || 'none'
     });
 
-    const headers = await auth.getHeaders();
-    const { eventStart, eventEnd, payload } = buildEventData(deal, contactId);
+    // Fetch the existing event so we can preserve its event_start/event_end
+    // unless the event_date in HubSpot actually changed
+    const existingEvent = await getEvent(tsEventId);
+    logger.tripleseat(`Existing event fetched`, {
+      tsEventId,
+      existingEventStart: existingEvent.event_start,
+      existingEventEnd: existingEvent.event_end,
+      existingEventDate: existingEvent.event_date
+    });
 
+    // Determine whether the HubSpot event_date has changed vs what TripleSeat has
+    let eventStart = existingEvent.event_start;
+    let eventEnd = existingEvent.event_end;
+    let tsEventDate = existingEvent.event_date;
+
+    if (deal.event_date) {
+      const incomingDate = new Date(deal.event_date);
+      const incomingDateStr = formatDateOnly(incomingDate);
+
+      // Normalise the existing TripleSeat date for comparison
+      // TS stores event_date as MM/DD/YYYY or similar
+      const existingDateNorm = existingEvent.event_date
+        ? formatDateOnly(new Date(existingEvent.event_date))
+        : null;
+
+      if (incomingDateStr !== existingDateNorm) {
+        // Date changed - recalculate times using current wall-clock time on the new date
+        const now = new Date();
+        const start = new Date(
+          incomingDate.getUTCFullYear(),
+          incomingDate.getUTCMonth(),
+          incomingDate.getUTCDate(),
+          now.getHours(),
+          now.getMinutes(),
+          0
+        );
+        const end = new Date(start.getTime() + 60 * 60 * 1000);
+        tsEventDate = incomingDateStr;
+        eventStart = formatDateTime(start);
+        eventEnd = formatDateTime(end);
+        logger.tripleseat(`Event date changed - recalculating times`, {
+          from: existingDateNorm,
+          to: incomingDateStr,
+          newEventStart: eventStart,
+          newEventEnd: eventEnd
+        });
+      } else {
+        logger.tripleseat(`Event date unchanged - preserving existing times`, {
+          date: incomingDateStr,
+          eventStart,
+          eventEnd
+        });
+      }
+    }
+
+    const dealAmount = deal.amount ? parseFloat(deal.amount) : null;
+    const guestCount = deal.number_of_guests__cloned__ ? parseInt(deal.number_of_guests__cloned__) : null;
+    const leadSources = deal.lead_source ? [deal.lead_source] : [];
+
+    const payload = {
+      name: deal.dealname || "Event from HubSpot",
+      status: mapDealStageToEventStatus(deal.dealstage),
+      contact_id: contactId,
+      account_id: parseInt(ACCOUNT_ID),
+      event_date: tsEventDate,
+      event_start: eventStart,
+      event_end: eventEnd,
+      location_id: 20271,
+      room_ids: [238254],
+      description: deal.event_details || "",
+      ...(dealAmount ? { actual_amount: dealAmount } : {}),
+      ...(guestCount ? { guest_count: guestCount } : {}),
+      ...(leadSources.length ? { selected_lead_sources: leadSources } : {}),
+      // booking: {
+      //   status: mapDealStageToEventStatus(deal.dealstage).toLowerCase(),
+      //   source: "HubSpot Integration"
+      // }
+    };
+
+    const headers = await auth.getHeaders();
     const res = await axios.put(
       `${BASE_URL}/v1/events/${tsEventId}.json`,
       { event: payload },

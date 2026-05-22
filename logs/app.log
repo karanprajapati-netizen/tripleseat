@@ -736,3 +736,865 @@
   "tripleseat_event_id": "59939149"
 }
   processingTime: 817ms
+2026-05-22 13:40:22 [INFO] AUTH: Authentication service initialized
+  baseURL: https://api.tripleseat.com
+  hasClientId: true
+  hasClientSecret: true
+2026-05-22 13:40:22 [INFO] HUBSPOT: Fetching deal 210932483059
+2026-05-22 13:40:23 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 210932483059
+  dealName: Developer Testing deal 3
+  dealStage: 2822434791
+  tripleseatPush: true
+  eventDate: 2026-05-23
+  guestCount: null
+  leadSource: null
+  amount: 4670.09
+  tripleseatEventId: 59939149
+  processingTime: 863ms
+2026-05-22 13:40:23 [INFO] HUBSPOT: Fetching associated contacts for deal 210932483059
+2026-05-22 13:40:24 [INFO] HUBSPOT: Found 1 associated contacts
+  dealId: 210932483059
+  contactIds: [
+  256416035792
+]
+  processingTime: 604ms
+2026-05-22 13:40:24 [INFO] HUBSPOT: Fetching contact 256416035792
+  properties: [
+  "firstname",
+  "lastname",
+  "email",
+  "phone",
+  "company",
+  "jobtitle"
+]
+2026-05-22 13:40:25 [INFO] HUBSPOT: Contact retrieved successfully
+  contactId: 256416035792
+  email: developer123@gmail.com
+  name: Developer test
+  processingTime: 808ms
+2026-05-22 13:40:25 [INFO] TRIPLESEAT: Searching for existing contact: developer123@gmail.com
+  accountId: 43553180
+2026-05-22 13:40:25 [INFO] AUTH: Requesting new OAuth2 access token (#1)
+2026-05-22 13:40:26 [INFO] AUTH: OAuth2 token obtained successfully
+  tokenLength: 43
+  expiresIn: 7199
+  processingTime: 915ms
+  expiresAt: 5/22/2026, 2:30:26 PM
+2026-05-22 13:40:27 [INFO] TRIPLESEAT: No existing contact found
+  email: developer123@gmail.com
+  processingTime: 2380ms
+2026-05-22 13:40:27 [INFO] TRIPLESEAT: Creating new contact for developer123@gmail.com
+  name: Developer test
+  phone: +15222565956
+  accountId: 43553180
+2026-05-22 13:40:27 [INFO] AUTH: Using cached token (expires in 2999s)
+2026-05-22 13:40:28 [INFO] TRIPLESEAT: Contact created successfully
+  email: developer123@gmail.com
+  tripleseatContactId: 58679704
+  processingTime: 3326ms
+2026-05-22 13:40:28 [INFO] TRIPLESEAT: Creating event for deal: Developer Testing deal 3
+  contactId: 58679704
+  hubspotDealId: 210932483059
+  dealStage: 2822434791
+  eventDate: 2026-05-23
+  guestCount: none
+  leadSource: none
+  amount: 4670.09
+2026-05-22 13:40:28 [INFO] AUTH: Using cached token (expires in 2998s)
+2026-05-22 13:40:30 [INFO] TRIPLESEAT: Event created successfully
+  eventName: Developer Testing deal 3
+  tripleseatEventId: 59970219
+  eventDates: 05/23/2026 1:40 PM - 05/23/2026 2:40 PM
+  grandTotal: 4670.09
+  hubspotDealId: 210932483059
+  processingTime: 1439ms
+2026-05-22 13:40:30 [INFO] HUBSPOT: Updating deal 210932483059
+  properties: {
+  "tripleseat_event_id": "59970219"
+}
+2026-05-22 13:40:30 [INFO] HUBSPOT: Deal updated successfully
+  dealId: 210932483059
+  properties: {
+  "tripleseat_event_id": "59970219"
+}
+  processingTime: 597ms
+2026-05-22 13:41:38 [INFO] AUTH: Authentication service initialized
+  baseURL: https://api.tripleseat.com
+  hasClientId: true
+  hasClientSecret: true
+2026-05-22 13:41:38 [INFO] HUBSPOT: Fetching deal 211084399576
+2026-05-22 13:41:39 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211084399576
+  dealName: Developer Testing deal 5 update
+  dealStage: 2822434793
+  tripleseatPush: true
+  eventDate: 2026-05-23
+  guestCount: 22
+  leadSource: Hard Rock RFP
+  amount: 2000
+  tripleseatEventId: 59970029
+  processingTime: 1252ms
+2026-05-22 13:41:39 [INFO] HUBSPOT: Fetching associated contacts for deal 211084399576
+2026-05-22 13:41:39 [INFO] HUBSPOT: Found 1 associated contacts
+  dealId: 211084399576
+  contactIds: [
+  256416035792
+]
+  processingTime: 546ms
+2026-05-22 13:41:39 [INFO] HUBSPOT: Fetching contact 256416035792
+  properties: [
+  "firstname",
+  "lastname",
+  "email",
+  "phone",
+  "company",
+  "jobtitle"
+]
+2026-05-22 13:41:40 [INFO] HUBSPOT: Contact retrieved successfully
+  contactId: 256416035792
+  email: developer123@gmail.com
+  name: Developer test
+  processingTime: 527ms
+2026-05-22 13:41:40 [INFO] TRIPLESEAT: Searching for existing contact: developer123@gmail.com
+  accountId: 43553180
+2026-05-22 13:41:40 [INFO] AUTH: Requesting new OAuth2 access token (#1)
+2026-05-22 13:41:41 [INFO] AUTH: OAuth2 token obtained successfully
+  tokenLength: 43
+  expiresIn: 7200
+  processingTime: 783ms
+  expiresAt: 5/22/2026, 2:31:41 PM
+2026-05-22 13:41:42 [INFO] TRIPLESEAT: No existing contact found
+  email: developer123@gmail.com
+  processingTime: 1888ms
+2026-05-22 13:41:42 [INFO] TRIPLESEAT: Creating new contact for developer123@gmail.com
+  name: Developer test
+  phone: +15222565956
+  accountId: 43553180
+2026-05-22 13:41:42 [INFO] AUTH: Using cached token (expires in 2999s)
+2026-05-22 13:41:43 [INFO] TRIPLESEAT: Contact created successfully
+  email: developer123@gmail.com
+  tripleseatContactId: 58679713
+  processingTime: 3158ms
+2026-05-22 13:41:43 [INFO] TRIPLESEAT: Creating event for deal: Developer Testing deal 5 update
+  contactId: 58679713
+  hubspotDealId: 211084399576
+  dealStage: 2822434793
+  eventDate: 2026-05-23
+  guestCount: 22
+  leadSource: Hard Rock RFP
+  amount: 2000
+2026-05-22 13:41:43 [INFO] AUTH: Using cached token (expires in 2998s)
+2026-05-22 13:41:44 [ERROR] Failed to create event for deal: Developer Testing deal 5 update
+  contactId: 58679713
+  hubspotDealId: 211084399576
+  error: Request failed with status code 422
+  status: 422
+  response: {
+  "errors": {
+    "base": [
+      "Tentative Events cannot overlap with existing Prospect, Tentative, Definite, and Closed Events"
+    ]
+  }
+}
+2026-05-22 13:42:24 [INFO] AUTH: Authentication service initialized
+  baseURL: https://api.tripleseat.com
+  hasClientId: true
+  hasClientSecret: true
+2026-05-22 13:42:24 [INFO] HUBSPOT: Fetching deal 211084399576
+2026-05-22 13:42:25 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211084399576
+  dealName: Developer Testing deal 5 update
+  dealStage: 2822434791
+  tripleseatPush: true
+  eventDate: 2026-05-23
+  guestCount: 22
+  leadSource: Hard Rock RFP
+  amount: 2000
+  tripleseatEventId: 59970029
+  processingTime: 573ms
+2026-05-22 13:42:25 [INFO] HUBSPOT: Fetching associated contacts for deal 211084399576
+2026-05-22 13:42:25 [INFO] HUBSPOT: Found 1 associated contacts
+  dealId: 211084399576
+  contactIds: [
+  256416035792
+]
+  processingTime: 528ms
+2026-05-22 13:42:25 [INFO] HUBSPOT: Fetching contact 256416035792
+  properties: [
+  "firstname",
+  "lastname",
+  "email",
+  "phone",
+  "company",
+  "jobtitle"
+]
+2026-05-22 13:42:26 [INFO] HUBSPOT: Contact retrieved successfully
+  contactId: 256416035792
+  email: developer123@gmail.com
+  name: Developer test
+  processingTime: 562ms
+2026-05-22 13:42:26 [INFO] TRIPLESEAT: Searching for existing contact: developer123@gmail.com
+  accountId: 43553180
+2026-05-22 13:42:26 [INFO] AUTH: Requesting new OAuth2 access token (#1)
+2026-05-22 13:42:27 [INFO] AUTH: OAuth2 token obtained successfully
+  tokenLength: 43
+  expiresIn: 7199
+  processingTime: 745ms
+  expiresAt: 5/22/2026, 2:32:27 PM
+2026-05-22 13:42:28 [INFO] TRIPLESEAT: No existing contact found
+  email: developer123@gmail.com
+  processingTime: 2076ms
+2026-05-22 13:42:28 [INFO] TRIPLESEAT: Creating new contact for developer123@gmail.com
+  name: Developer test
+  phone: +15222565956
+  accountId: 43553180
+2026-05-22 13:42:28 [INFO] AUTH: Using cached token (expires in 2999s)
+2026-05-22 13:42:29 [INFO] TRIPLESEAT: Contact created successfully
+  email: developer123@gmail.com
+  tripleseatContactId: 58679714
+  processingTime: 2910ms
+2026-05-22 13:42:29 [INFO] TRIPLESEAT: Creating event for deal: Developer Testing deal 5 update
+  contactId: 58679714
+  hubspotDealId: 211084399576
+  dealStage: 2822434791
+  eventDate: 2026-05-23
+  guestCount: 22
+  leadSource: Hard Rock RFP
+  amount: 2000
+2026-05-22 13:42:29 [INFO] AUTH: Using cached token (expires in 2998s)
+2026-05-22 13:42:30 [ERROR] Failed to create event for deal: Developer Testing deal 5 update
+  contactId: 58679714
+  hubspotDealId: 211084399576
+  error: Request failed with status code 422
+  status: 422
+  response: {
+  "errors": {
+    "base": [
+      "Tentative Events cannot overlap with existing Prospect, Tentative, Definite, and Closed Events"
+    ]
+  }
+}
+2026-05-22 13:48:57 [INFO] AUTH: Authentication service initialized
+  baseURL: https://api.tripleseat.com
+  hasClientId: true
+  hasClientSecret: true
+2026-05-22 13:48:57 [INFO] HUBSPOT: Fetching deal 211084399576
+2026-05-22 13:48:57 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211084399576
+  dealName: Developer Testing deal 5 update
+  dealStage: 2822434791
+  tripleseatPush: true
+  eventDate: 2026-05-23
+  guestCount: 22
+  leadSource: Hard Rock RFP
+  amount: 2000
+  tripleseatEventId: 59970029
+  processingTime: 597ms
+2026-05-22 13:48:57 [INFO] HUBSPOT: Fetching associated contacts for deal 211084399576
+2026-05-22 13:48:58 [INFO] HUBSPOT: Found 1 associated contacts
+  dealId: 211084399576
+  contactIds: [
+  256416035792
+]
+  processingTime: 615ms
+2026-05-22 13:48:58 [INFO] HUBSPOT: Fetching contact 256416035792
+  properties: [
+  "firstname",
+  "lastname",
+  "email",
+  "phone",
+  "company",
+  "jobtitle"
+]
+2026-05-22 13:48:59 [INFO] HUBSPOT: Contact retrieved successfully
+  contactId: 256416035792
+  email: developer123@gmail.com
+  name: Developer test
+  processingTime: 1204ms
+2026-05-22 13:48:59 [INFO] TRIPLESEAT: Searching for existing contact: developer123@gmail.com
+  accountId: 43553180
+2026-05-22 13:48:59 [INFO] AUTH: Requesting new OAuth2 access token (#1)
+2026-05-22 13:49:00 [INFO] AUTH: OAuth2 token obtained successfully
+  tokenLength: 43
+  expiresIn: 7200
+  processingTime: 864ms
+  expiresAt: 5/22/2026, 2:39:00 PM
+2026-05-22 13:49:01 [INFO] TRIPLESEAT: No existing contact found
+  email: developer123@gmail.com
+  processingTime: 1982ms
+2026-05-22 13:49:01 [INFO] AUTH: Using cached token (expires in 2999s)
+2026-05-22 13:49:01 [INFO] TRIPLESEAT: Creating new contact for developer123@gmail.com
+  name: Developer test
+  phone: +15222565956
+  accountId: 43553180
+2026-05-22 13:49:02 [INFO] TRIPLESEAT: Contact created successfully
+  email: developer123@gmail.com
+  tripleseatContactId: 58679730
+  processingTime: 2791ms
+2026-05-22 13:49:02 [INFO] TRIPLESEAT: Creating event for deal: Developer Testing deal 5 update
+  contactId: 58679730
+  hubspotDealId: 211084399576
+  dealStage: 2822434791
+  eventDate: 2026-05-23
+  guestCount: 22
+  leadSource: Hard Rock RFP
+  amount: 2000
+2026-05-22 13:49:02 [INFO] AUTH: Using cached token (expires in 2998s)
+2026-05-22 13:49:03 [ERROR] Failed to create event for deal: Developer Testing deal 5 update
+  contactId: 58679730
+  hubspotDealId: 211084399576
+  error: Request failed with status code 422
+  status: 422
+  response: {
+  "errors": {
+    "base": [
+      "Tentative Events cannot overlap with existing Prospect, Tentative, Definite, and Closed Events"
+    ]
+  }
+}
+2026-05-22 13:53:11 [INFO] AUTH: Authentication service initialized
+  baseURL: https://api.tripleseat.com
+  hasClientId: true
+  hasClientSecret: true
+2026-05-22 13:53:11 [INFO] HUBSPOT: Fetching deal 211084399576
+2026-05-22 13:53:12 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211084399576
+  dealName: Developer Testing deal 5 update
+  dealStage: 2822434791
+  tripleseatPush: true
+  eventDate: 2026-05-23
+  guestCount: 22
+  leadSource: Hard Rock RFP
+  amount: 2000
+  tripleseatEventId: 59970029
+  processingTime: 633ms
+2026-05-22 13:53:12 [INFO] HUBSPOT: Fetching associated contacts for deal 211084399576
+2026-05-22 13:53:13 [INFO] HUBSPOT: Found 1 associated contacts
+  dealId: 211084399576
+  contactIds: [
+  256416035792
+]
+  processingTime: 1325ms
+2026-05-22 13:53:13 [INFO] HUBSPOT: Fetching contact 256416035792
+  properties: [
+  "firstname",
+  "lastname",
+  "email",
+  "phone",
+  "company",
+  "jobtitle"
+]
+2026-05-22 13:53:14 [INFO] HUBSPOT: Contact retrieved successfully
+  contactId: 256416035792
+  email: developer123@gmail.com
+  name: Developer test
+  processingTime: 1218ms
+2026-05-22 13:53:14 [INFO] TRIPLESEAT: Searching for existing contact: developer123@gmail.com
+  accountId: 43553180
+2026-05-22 13:53:14 [INFO] AUTH: Requesting new OAuth2 access token (#1)
+2026-05-22 13:53:15 [INFO] AUTH: OAuth2 token obtained successfully
+  tokenLength: 43
+  expiresIn: 7200
+  processingTime: 762ms
+  expiresAt: 5/22/2026, 2:43:15 PM
+2026-05-22 13:53:16 [INFO] TRIPLESEAT: Contact search raw results
+  email: developer123@gmail.com
+  totalRaw: 0
+  sample: none
+2026-05-22 13:53:16 [INFO] TRIPLESEAT: No existing contact found
+  email: developer123@gmail.com
+  processingTime: 1628ms
+2026-05-22 13:53:16 [INFO] AUTH: Using cached token (expires in 2999s)
+2026-05-22 13:53:16 [INFO] TRIPLESEAT: Creating new contact for developer123@gmail.com
+  name: Developer test
+  phone: +15222565956
+  accountId: 43553180
+2026-05-22 13:53:17 [INFO] TRIPLESEAT: Contact created successfully
+  email: developer123@gmail.com
+  tripleseatContactId: 58679743
+  processingTime: 2500ms
+2026-05-22 13:53:17 [INFO] TRIPLESEAT: Creating event for deal: Developer Testing deal 5 update
+  contactId: 58679743
+  hubspotDealId: 211084399576
+  dealStage: 2822434791
+  eventDate: 2026-05-23
+  guestCount: 22
+  leadSource: Hard Rock RFP
+  amount: 2000
+2026-05-22 13:53:17 [INFO] AUTH: Using cached token (expires in 2998s)
+2026-05-22 13:53:18 [ERROR] Failed to create event for deal: Developer Testing deal 5 update
+  contactId: 58679743
+  hubspotDealId: 211084399576
+  error: Request failed with status code 422
+  status: 422
+  response: {
+  "errors": {
+    "base": [
+      "Tentative Events cannot overlap with existing Prospect, Tentative, Definite, and Closed Events"
+    ]
+  }
+}
+2026-05-22 14:45:10 [INFO] AUTH: Authentication service initialized
+  baseURL: https://api.tripleseat.com
+  hasClientId: true
+  hasClientSecret: true
+2026-05-22 14:45:10 [INFO] HUBSPOT: Fetching deal 211084399576
+2026-05-22 14:45:11 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211084399576
+  dealName: Developer Testing deal 5 update
+  dealStage: 2822434791
+  tripleseatPush: true
+  eventDate: 2026-05-23
+  guestCount: 22
+  leadSource: Hard Rock RFP
+  amount: 2000
+  tripleseatEventId: 59970029
+  processingTime: 940ms
+2026-05-22 14:45:11 [INFO] HUBSPOT: Fetching associated contacts for deal 211084399576
+2026-05-22 14:45:12 [INFO] HUBSPOT: Found 1 associated contacts
+  dealId: 211084399576
+  contactIds: [
+  256416035792
+]
+  processingTime: 634ms
+2026-05-22 14:45:12 [INFO] HUBSPOT: Fetching contact 256416035792
+  properties: [
+  "firstname",
+  "lastname",
+  "email",
+  "phone",
+  "company",
+  "jobtitle"
+]
+2026-05-22 14:45:12 [INFO] HUBSPOT: Contact retrieved successfully
+  contactId: 256416035792
+  email: developer123@gmail.com
+  name: Developer test
+  processingTime: 639ms
+2026-05-22 14:45:12 [INFO] TRIPLESEAT: Searching for existing contact: developer123@gmail.com
+  accountId: 43553180
+2026-05-22 14:45:12 [INFO] AUTH: Requesting new OAuth2 access token (#1)
+2026-05-22 14:45:13 [INFO] AUTH: OAuth2 token obtained successfully
+  tokenLength: 43
+  expiresIn: 7199
+  processingTime: 1115ms
+  expiresAt: 5/22/2026, 3:35:13 PM
+2026-05-22 14:45:14 [INFO] TRIPLESEAT: Contact search response keys
+  email: developer123@gmail.com
+  topLevelKeys: [
+  "total_pages",
+  "results"
+]
+  isArray: false
+  rawPreview: {"total_pages":1,"results":[{"id":58634298,"first_name":"Developer","last_name":"test","account_id":43553180,"customer_id":9905,"site_id":10627,"title":null,"contact_type":null,"email_opt_in":false,"owned_by":207142,"description":null,"twitter_account":null,"facebook_account":null,"instagram_account":null,"linkedin_account":null,"created_at":"5/21/2026 5:05 AM","updated_at":"5/21/2026 5:05 AM","deleted_at":null,"email_addresses":[{"id":59838778,"address":"developer123@gmail.com"}],"phone_numbers":[{"id":106882729,"number":"+15222565956","phone_number_type":null,"extension":null}],"websites":[{
+2026-05-22 14:45:14 [INFO] TRIPLESEAT: Contact search parsed
+  email: developer123@gmail.com
+  totalFound: 17
+2026-05-22 14:45:14 [INFO] TRIPLESEAT: Found existing contact
+  email: developer123@gmail.com
+  contactId: 58634298
+  totalFound: 17
+  processingTime: 2138ms
+2026-05-22 14:45:14 [INFO] AUTH: Using cached token (expires in 2999s)
+2026-05-22 14:45:14 [INFO] TRIPLESEAT: Updating existing contact for developer123@gmail.com
+  contactId: 58634298
+2026-05-22 14:45:15 [INFO] TRIPLESEAT: Contact updated successfully
+  email: developer123@gmail.com
+  tripleseatContactId: 58634298
+  processingTime: 2997ms
+2026-05-22 14:45:15 [INFO] TRIPLESEAT: Creating event for deal: Developer Testing deal 5 update
+  contactId: 58634298
+  hubspotDealId: 211084399576
+  dealStage: 2822434791
+  eventDate: 2026-05-23
+  guestCount: 22
+  leadSource: Hard Rock RFP
+  amount: 2000
+2026-05-22 14:45:15 [INFO] AUTH: Using cached token (expires in 2998s)
+2026-05-22 14:45:17 [ERROR] Failed to create event for deal: Developer Testing deal 5 update
+  contactId: 58634298
+  hubspotDealId: 211084399576
+  error: Request failed with status code 422
+  status: 422
+  response: {
+  "errors": {
+    "base": [
+      "Tentative Events cannot overlap with existing Prospect, Tentative, Definite, and Closed Events"
+    ]
+  }
+}
+2026-05-22 15:06:07 [INFO] AUTH: Authentication service initialized
+  baseURL: https://api.tripleseat.com
+  hasClientId: true
+  hasClientSecret: true
+2026-05-22 15:06:07 [INFO] HUBSPOT: Fetching deal 211084399576
+2026-05-22 15:06:08 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211084399576
+  dealName: Developer Testing deal 5 update
+  dealStage: 2822434791
+  tripleseatPush: true
+  eventDate: 2026-05-23
+  guestCount: 22
+  leadSource: Hard Rock RFP
+  amount: 2000
+  tripleseatEventId: 59970029
+  processingTime: 722ms
+2026-05-22 15:06:08 [INFO] HUBSPOT: Fetching associated contacts for deal 211084399576
+2026-05-22 15:06:09 [INFO] HUBSPOT: Found 1 associated contacts
+  dealId: 211084399576
+  contactIds: [
+  256416035792
+]
+  processingTime: 1286ms
+2026-05-22 15:06:09 [INFO] HUBSPOT: Fetching contact 256416035792
+  properties: [
+  "firstname",
+  "lastname",
+  "email",
+  "phone",
+  "company",
+  "jobtitle"
+]
+2026-05-22 15:06:10 [INFO] HUBSPOT: Contact retrieved successfully
+  contactId: 256416035792
+  email: developer123@gmail.com
+  name: Developer test
+  processingTime: 666ms
+2026-05-22 15:06:10 [INFO] TRIPLESEAT: Searching for existing contact: developer123@gmail.com
+  accountId: 43553180
+2026-05-22 15:06:10 [INFO] AUTH: Requesting new OAuth2 access token (#1)
+2026-05-22 15:06:11 [INFO] AUTH: OAuth2 token obtained successfully
+  tokenLength: 43
+  expiresIn: 7200
+  processingTime: 788ms
+  expiresAt: 5/22/2026, 3:56:11 PM
+2026-05-22 15:06:12 [INFO] TRIPLESEAT: Contact search response keys
+  email: developer123@gmail.com
+  topLevelKeys: [
+  "total_pages",
+  "results"
+]
+  isArray: false
+  rawPreview: {"total_pages":1,"results":[{"id":58634298,"first_name":"Developer","last_name":"test","account_id":43553180,"customer_id":9905,"site_id":10627,"title":null,"contact_type":null,"email_opt_in":false,"owned_by":207142,"description":null,"twitter_account":null,"facebook_account":null,"instagram_account":null,"linkedin_account":null,"created_at":"5/21/2026 5:05 AM","updated_at":"5/21/2026 5:05 AM","deleted_at":null,"email_addresses":[{"id":59838778,"address":"developer123@gmail.com"},{"id":59885587,"address":"developer123@gmail.com"}],"phone_numbers":[{"id":106882729,"number":"+15222565956","phone
+2026-05-22 15:06:12 [INFO] TRIPLESEAT: Contact search parsed
+  email: developer123@gmail.com
+  totalFound: 17
+2026-05-22 15:06:12 [INFO] TRIPLESEAT: Found existing contact
+  email: developer123@gmail.com
+  contactId: 58634298
+  totalFound: 17
+  processingTime: 1746ms
+2026-05-22 15:06:12 [INFO] AUTH: Using cached token (expires in 2999s)
+2026-05-22 15:06:12 [INFO] TRIPLESEAT: Updating existing contact for developer123@gmail.com
+  contactId: 58634298
+2026-05-22 15:06:13 [INFO] TRIPLESEAT: Contact updated successfully
+  email: developer123@gmail.com
+  tripleseatContactId: 58634298
+  processingTime: 2542ms
+2026-05-22 15:06:13 [INFO] TRIPLESEAT: Updating event 59970029 for deal: Developer Testing deal 5 update
+  contactId: 58634298
+  hubspotDealId: 211084399576
+  dealStage: 2822434791
+  eventDate: 2026-05-23
+  guestCount: 22
+  leadSource: Hard Rock RFP
+  amount: 2000
+2026-05-22 15:06:13 [INFO] AUTH: Using cached token (expires in 2998s)
+2026-05-22 15:06:14 [ERROR] Failed to update event 59970029 for deal: Developer Testing deal 5 update
+  contactId: 58634298
+  hubspotDealId: 211084399576
+  error: Request failed with status code 422
+  status: 422
+  response: {
+  "errors": {
+    "base": [
+      "Tentative Events cannot overlap with existing Prospect, Tentative, Definite, and Closed Events"
+    ]
+  }
+}
+2026-05-22 15:08:46 [INFO] AUTH: Authentication service initialized
+  baseURL: https://api.tripleseat.com
+  hasClientId: true
+  hasClientSecret: true
+2026-05-22 15:08:46 [INFO] HUBSPOT: Fetching deal 211084399576
+2026-05-22 15:08:47 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211084399576
+  dealName: Developer Testing deal 5 update
+  dealStage: 2822434791
+  tripleseatPush: true
+  eventDate: 2026-05-23
+  guestCount: 22
+  leadSource: Hard Rock RFP
+  amount: 2000
+  tripleseatEventId: 59970029
+  processingTime: 592ms
+2026-05-22 15:08:47 [INFO] HUBSPOT: Fetching associated contacts for deal 211084399576
+2026-05-22 15:08:48 [INFO] HUBSPOT: Found 1 associated contacts
+  dealId: 211084399576
+  contactIds: [
+  256416035792
+]
+  processingTime: 1243ms
+2026-05-22 15:08:48 [INFO] HUBSPOT: Fetching contact 256416035792
+  properties: [
+  "firstname",
+  "lastname",
+  "email",
+  "phone",
+  "company",
+  "jobtitle"
+]
+2026-05-22 15:08:48 [INFO] HUBSPOT: Contact retrieved successfully
+  contactId: 256416035792
+  email: developer123@gmail.com
+  name: Developer test
+  processingTime: 580ms
+2026-05-22 15:08:48 [INFO] TRIPLESEAT: Searching for existing contact: developer123@gmail.com
+  accountId: 43553180
+2026-05-22 15:08:48 [INFO] AUTH: Requesting new OAuth2 access token (#1)
+2026-05-22 15:08:49 [INFO] AUTH: OAuth2 token obtained successfully
+  tokenLength: 43
+  expiresIn: 7199
+  processingTime: 825ms
+  expiresAt: 5/22/2026, 3:58:49 PM
+2026-05-22 15:08:50 [INFO] TRIPLESEAT: Contact search response keys
+  email: developer123@gmail.com
+  topLevelKeys: [
+  "total_pages",
+  "results"
+]
+  isArray: false
+  rawPreview: {"total_pages":1,"results":[{"id":58634298,"first_name":"Developer","last_name":"test","account_id":43553180,"customer_id":9905,"site_id":10627,"title":null,"contact_type":null,"email_opt_in":false,"owned_by":207142,"description":null,"twitter_account":null,"facebook_account":null,"instagram_account":null,"linkedin_account":null,"created_at":"5/21/2026 5:05 AM","updated_at":"5/21/2026 5:05 AM","deleted_at":null,"email_addresses":[{"id":59838778,"address":"developer123@gmail.com"},{"id":59885587,"address":"developer123@gmail.com"},{"id":59885798,"address":"developer123@gmail.com"}],"phone_numbe
+2026-05-22 15:08:50 [INFO] TRIPLESEAT: Contact search parsed
+  email: developer123@gmail.com
+  totalFound: 17
+2026-05-22 15:08:50 [INFO] TRIPLESEAT: Found existing contact
+  email: developer123@gmail.com
+  contactId: 58634298
+  totalFound: 17
+  processingTime: 1855ms
+2026-05-22 15:08:50 [INFO] AUTH: Using cached token (expires in 2999s)
+2026-05-22 15:08:50 [INFO] TRIPLESEAT: Updating existing contact for developer123@gmail.com
+  contactId: 58634298
+2026-05-22 15:08:51 [INFO] TRIPLESEAT: Contact updated successfully
+  email: developer123@gmail.com
+  tripleseatContactId: 58634298
+  processingTime: 2663ms
+2026-05-22 15:08:51 [INFO] TRIPLESEAT: Updating event 59970029 for deal: Developer Testing deal 5 update
+  contactId: 58634298
+  hubspotDealId: 211084399576
+  dealStage: 2822434791
+  eventDate: 2026-05-23
+  guestCount: 22
+  leadSource: Hard Rock RFP
+  amount: 2000
+2026-05-22 15:08:51 [INFO] AUTH: Using cached token (expires in 2998s)
+2026-05-22 15:08:52 [INFO] TRIPLESEAT: Existing event fetched
+  tsEventId: 59970029
+  existingEventStart: 5/23/2026 6:38 AM
+  existingEventEnd: 5/23/2026 7:38 AM
+  existingEventDate: 5/23/2026
+2026-05-22 15:08:52 [INFO] TRIPLESEAT: Event date unchanged - preserving existing times
+  date: 05/23/2026
+  eventStart: 5/23/2026 6:38 AM
+  eventEnd: 5/23/2026 7:38 AM
+2026-05-22 15:08:52 [INFO] AUTH: Using cached token (expires in 2997s)
+2026-05-22 15:08:53 [ERROR] Failed to update event 59970029 for deal: Developer Testing deal 5 update
+  contactId: 58634298
+  hubspotDealId: 211084399576
+  error: Request failed with status code 500
+  status: 500
+  response: {
+  "success": false,
+  "error": "An unexpected error occurred. Please contact Tripleseat support for assistance. (Request Id: e31ff522-2d6b-4c3d-873e-cc926890f40e)"
+}
+2026-05-22 15:24:16 [INFO] AUTH: Authentication service initialized
+  baseURL: https://api.tripleseat.com
+  hasClientId: true
+  hasClientSecret: true
+2026-05-22 15:24:16 [INFO] HUBSPOT: Fetching deal 211084399576
+2026-05-22 15:24:17 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211084399576
+  dealName: Developer Testing deal 5 
+  dealStage: 2822434791
+  tripleseatPush: true
+  eventDate: 2026-05-25
+  guestCount: 22
+  leadSource: Hard Rock RFP
+  amount: 2000
+  tripleseatEventId: 59970029
+  processingTime: 766ms
+2026-05-22 15:24:17 [INFO] HUBSPOT: Fetching associated contacts for deal 211084399576
+2026-05-22 15:24:17 [INFO] HUBSPOT: Found 1 associated contacts
+  dealId: 211084399576
+  contactIds: [
+  256416035792
+]
+  processingTime: 637ms
+2026-05-22 15:24:17 [INFO] HUBSPOT: Fetching contact 256416035792
+  properties: [
+  "firstname",
+  "lastname",
+  "email",
+  "phone",
+  "company",
+  "jobtitle"
+]
+2026-05-22 15:24:18 [INFO] HUBSPOT: Contact retrieved successfully
+  contactId: 256416035792
+  email: developer123@gmail.com
+  name: Developer test
+  processingTime: 554ms
+2026-05-22 15:24:18 [INFO] TRIPLESEAT: Searching for existing contact: developer123@gmail.com
+  accountId: 43553180
+2026-05-22 15:24:18 [INFO] AUTH: Requesting new OAuth2 access token (#1)
+2026-05-22 15:24:19 [INFO] AUTH: OAuth2 token obtained successfully
+  tokenLength: 43
+  expiresIn: 7199
+  processingTime: 787ms
+  expiresAt: 5/22/2026, 4:14:19 PM
+2026-05-22 15:24:20 [INFO] TRIPLESEAT: Contact search response keys
+  email: developer123@gmail.com
+  topLevelKeys: [
+  "total_pages",
+  "results"
+]
+  isArray: false
+  rawPreview: {"total_pages":0,"results":[]}
+2026-05-22 15:24:20 [INFO] TRIPLESEAT: Contact search parsed
+  email: developer123@gmail.com
+  totalFound: 0
+2026-05-22 15:24:20 [INFO] TRIPLESEAT: No existing contact found
+  email: developer123@gmail.com
+  processingTime: 2007ms
+2026-05-22 15:24:20 [INFO] AUTH: Using cached token (expires in 2999s)
+2026-05-22 15:24:20 [INFO] TRIPLESEAT: Creating new contact for developer123@gmail.com
+  name: Developer test
+  phone: +15222565956
+  accountId: 43553180
+2026-05-22 15:24:21 [INFO] TRIPLESEAT: Contact created successfully
+  email: developer123@gmail.com
+  tripleseatContactId: 58680547
+  processingTime: 2932ms
+2026-05-22 15:24:21 [INFO] TRIPLESEAT: Updating event 59970029 for deal: Developer Testing deal 5 
+  contactId: 58680547
+  hubspotDealId: 211084399576
+  dealStage: 2822434791
+  eventDate: 2026-05-25
+  guestCount: 22
+  leadSource: Hard Rock RFP
+  amount: 2000
+2026-05-22 15:24:21 [INFO] AUTH: Using cached token (expires in 2998s)
+2026-05-22 15:24:22 [INFO] TRIPLESEAT: Existing event fetched
+  tsEventId: 59970029
+  existingEventStart: 5/23/2026 6:38 AM
+  existingEventEnd: 5/23/2026 7:38 AM
+  existingEventDate: 5/23/2026
+2026-05-22 15:24:22 [INFO] TRIPLESEAT: Event date changed - recalculating times
+  from: 05/23/2026
+  to: 05/25/2026
+  newEventStart: 05/25/2026 3:24 PM
+  newEventEnd: 05/25/2026 4:24 PM
+2026-05-22 15:24:22 [INFO] AUTH: Using cached token (expires in 2997s)
+2026-05-22 15:24:23 [INFO] TRIPLESEAT: Event updated successfully
+  eventName: Developer Testing deal 5 
+  tripleseatEventId: 59970029
+  eventDates: 05/25/2026 3:24 PM - 05/25/2026 4:24 PM
+  grandTotal: 2000
+  hubspotDealId: 211084399576
+  processingTime: 2136ms
+2026-05-22 15:32:33 [INFO] AUTH: Authentication service initialized
+  baseURL: https://api.tripleseat.com
+  hasClientId: true
+  hasClientSecret: true
+2026-05-22 15:32:33 [INFO] HUBSPOT: Fetching deal 211084399576
+2026-05-22 15:32:33 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211084399576
+  dealName: Developer Testing deal 5 final checking
+  dealStage: 2822434791
+  tripleseatPush: true
+  eventDate: 2026-05-25
+  guestCount: 15
+  leadSource: Hard Rock RFP
+  amount: 3000
+  tripleseatEventId: 59970029
+  processingTime: 614ms
+2026-05-22 15:32:33 [INFO] HUBSPOT: Fetching associated contacts for deal 211084399576
+2026-05-22 15:32:34 [INFO] HUBSPOT: Found 1 associated contacts
+  dealId: 211084399576
+  contactIds: [
+  256416035792
+]
+  processingTime: 544ms
+2026-05-22 15:32:34 [INFO] HUBSPOT: Fetching contact 256416035792
+  properties: [
+  "firstname",
+  "lastname",
+  "email",
+  "phone",
+  "company",
+  "jobtitle"
+]
+2026-05-22 15:32:34 [INFO] HUBSPOT: Contact retrieved successfully
+  contactId: 256416035792
+  email: developer123@gmail.com
+  name: Developer test
+  processingTime: 575ms
+2026-05-22 15:32:34 [INFO] TRIPLESEAT: Searching for existing contact: developer123@gmail.com
+  accountId: 43553180
+2026-05-22 15:32:34 [INFO] AUTH: Requesting new OAuth2 access token (#1)
+2026-05-22 15:32:35 [INFO] AUTH: OAuth2 token obtained successfully
+  tokenLength: 43
+  expiresIn: 7200
+  processingTime: 799ms
+  expiresAt: 5/22/2026, 4:22:35 PM
+2026-05-22 15:32:36 [INFO] TRIPLESEAT: Contact search response keys
+  email: developer123@gmail.com
+  topLevelKeys: [
+  "total_pages",
+  "results"
+]
+  isArray: false
+  rawPreview: {"total_pages":1,"results":[{"id":58680547,"first_name":"Developer","last_name":"test","account_id":43553180,"customer_id":9905,"site_id":10627,"title":null,"contact_type":null,"email_opt_in":false,"owned_by":207142,"description":null,"twitter_account":null,"facebook_account":null,"instagram_account":null,"linkedin_account":null,"created_at":"5/22/2026 5:54 AM","updated_at":"5/22/2026 5:54 AM","deleted_at":null,"email_addresses":[{"id":59885898,"address":"developer123@gmail.com"}],"phone_numbers":[{"id":106968246,"number":"+15222565956","phone_number_type":null,"extension":null}],"websites":[{
+2026-05-22 15:32:36 [INFO] TRIPLESEAT: Contact search parsed
+  email: developer123@gmail.com
+  totalFound: 1
+2026-05-22 15:32:36 [INFO] TRIPLESEAT: Found existing contact
+  email: developer123@gmail.com
+  contactId: 58680547
+  totalFound: 1
+  processingTime: 1819ms
+2026-05-22 15:32:36 [INFO] AUTH: Using cached token (expires in 2999s)
+2026-05-22 15:32:36 [INFO] TRIPLESEAT: Updating existing contact for developer123@gmail.com
+  contactId: 58680547
+2026-05-22 15:32:37 [INFO] TRIPLESEAT: Contact updated successfully
+  email: developer123@gmail.com
+  tripleseatContactId: 58680547
+  processingTime: 2710ms
+2026-05-22 15:32:37 [INFO] TRIPLESEAT: Updating event 59970029 for deal: Developer Testing deal 5 final checking
+  contactId: 58680547
+  hubspotDealId: 211084399576
+  dealStage: 2822434791
+  eventDate: 2026-05-25
+  guestCount: 15
+  leadSource: Hard Rock RFP
+  amount: 3000
+2026-05-22 15:32:37 [INFO] AUTH: Using cached token (expires in 2998s)
+2026-05-22 15:32:38 [INFO] TRIPLESEAT: Existing event fetched
+  tsEventId: 59970029
+  existingEventStart: 5/25/2026 3:24 PM
+  existingEventEnd: 5/25/2026 4:24 PM
+  existingEventDate: 5/25/2026
+2026-05-22 15:32:38 [INFO] TRIPLESEAT: Event date unchanged - preserving existing times
+  date: 05/25/2026
+  eventStart: 5/25/2026 3:24 PM
+  eventEnd: 5/25/2026 4:24 PM
+2026-05-22 15:32:38 [INFO] AUTH: Using cached token (expires in 2997s)
+2026-05-22 15:32:39 [INFO] TRIPLESEAT: Event updated successfully
+  eventName: Developer Testing deal 5 final checking
+  tripleseatEventId: 59970029
+  eventDates: 5/25/2026 3:24 PM - 5/25/2026 4:24 PM
+  grandTotal: 3000
+  hubspotDealId: 211084399576
+  processingTime: 1931ms

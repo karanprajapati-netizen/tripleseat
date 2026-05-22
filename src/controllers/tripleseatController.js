@@ -156,6 +156,33 @@ exports.handleWebhook = async (req, res) => {
         logger.tripleseat("Syncing description to HubSpot event_details", { dealId });
       }
     }
+    // --------------------------------------------------
+    // LEAD SOURCE SYNC  (selected_lead_sources → lead_source)
+    // Triggered by: Update Event
+    // --------------------------------------------------
+    const tsLeadSources = Array.isArray(eventData.selected_lead_sources)
+      ? eventData.selected_lead_sources.map(String)
+      : [];
+    const currentLeadSource = deal.properties?.lead_source || "";
+    if (tsLeadSources.length > 0) {
+      const tsLeadSourcesStr = tsLeadSources.join("|");
+      if (tsLeadSourcesStr !== currentLeadSource) {
+        updates.lead_source = tsLeadSourcesStr;
+        logger.tripleseat("Syncing selected_lead_sources to HubSpot lead_source", { tsLeadSources, dealId });
+      }
+    }
+    // --------------------------------------------------
+    // Event Name SYNC  (name → dealname)
+    // Triggered by: Update Event 
+    // --------------------------------------------------
+    const tsEventName = eventData.name != null ? String(eventData.name) : null;
+    if (tsEventName !== null) {
+      const currentName = deal.properties?.dealname || "";
+      if (tsEventName !== currentName) {
+        updates.dealname = tsEventName;
+        logger.tripleseat("Syncing event name to HubSpot dealname", { dealId });
+      } 
+    }
 
     // --------------------------------------------------
     // APPLY UPDATES

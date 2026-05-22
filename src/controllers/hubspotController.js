@@ -18,14 +18,12 @@ exports.handleWebhook = async (req, res) => {
     for (const event of events) {
 
       let dealId;
-      let dealData = null;
 
       // --------------------------------------------------
       // HANDLE DIFFERENT PAYLOAD TYPES
       // --------------------------------------------------
       if (event.deal) {
-        dealData = event.deal;
-        dealId = dealData.id;
+        dealId = event.deal.id;
 
       } else if (event.objectId) {
         dealId = event.objectId;
@@ -57,15 +55,9 @@ exports.handleWebhook = async (req, res) => {
       }
 
       // --------------------------------------------------
-      // FETCH DEAL
+      // FETCH DEAL (always fresh - webhook payload may have incomplete properties)
       // --------------------------------------------------
-      let deal;
-
-      if (dealData?.properties) {
-        deal = dealData;
-      } else {
-        deal = await hubspot.getDeal(dealId);
-      }
+      const deal = await hubspot.getDeal(dealId);
 
       if (deal.properties.tripleseat_push !== "true") {
         continue;
@@ -79,6 +71,8 @@ exports.handleWebhook = async (req, res) => {
       if (!contactIds?.length) continue;
 
       const existingTsEventId = deal.properties.tripleseat_event_id;
+      logger.webhook("Existing Tripleseat event ID on deal", { dealId, existingTsEventId });
+      
 
       // Only process the primary contact (first associated)
       const primaryContactId = contactIds[0];
