@@ -65,7 +65,7 @@ exports.handleWebhook = async (req, res) => {
     // TripleSeat can wrap the data under an "event" key or send it flat
     const eventData = payload.event ?? payload;
     logger.tripleseat("Parsed event data", {
-      eventData: JSON.stringify(eventData)
+      eventData: JSON.stringify(eventData).substring(0, 800)
     });
     const tsEventId = eventData.id;
     logger.tripleseat("Extracted TripleSeat event ID", { tsEventId });  
@@ -175,18 +175,18 @@ exports.handleWebhook = async (req, res) => {
     //     logger.tripleseat("Syncing selected_lead_sources to HubSpot lead_source", { tsLeadSources, dealId });
     //   }
     // }
-    // // --------------------------------------------------
-    // // Event Name SYNC  (name → dealname)
-    // // Triggered by: Update Event 
-    // // --------------------------------------------------
-    // const tsEventName = eventData.name != null ? String(eventData.name) : null;
-    // if (tsEventName !== null) {
-    //   const currentName = deal.properties?.dealname || "";
-    //   if (tsEventName !== currentName) {
-    //     updates.dealname = tsEventName;
-    //     logger.tripleseat("Syncing event name to HubSpot dealname", { dealId });
-    //   } 
-    // }
+    // --------------------------------------------------
+    // Event Name SYNC  (name → dealname)
+    // Triggered by: Update Event 
+    // --------------------------------------------------
+    const tsEventName = eventData.name != null ? String(eventData.name) : null;
+    if (tsEventName !== null) {
+      const currentName = deal.properties?.dealname || "";
+      if (tsEventName !== currentName) {
+        updates.dealname = tsEventName;
+        logger.tripleseat("Syncing event name to HubSpot dealname", { dealId });
+      } 
+    }
 
     // --------------------------------------------------
     // APPLY UPDATES

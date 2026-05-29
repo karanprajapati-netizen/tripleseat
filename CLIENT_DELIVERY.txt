@@ -1,0 +1,345 @@
+# HubSpot ↔ TripleSeat Integration - Client Delivery Document
+
+**Project:** The Factory - HubSpot & TripleSeat Middleware  
+**Delivered by:** TrooInbound  
+**Date:** May 2026  
+
+---
+
+## Table of Contents
+
+1. [System Overview](#1-system-overview)
+2. [Integration Flow](#2-integration-flow)
+3. [Trigger Points](#3-trigger-points)
+4. [Property Sync - HubSpot to TripleSeat](#4-property-sync--hubspot-to-tripleseat)
+5. [Property Sync - TripleSeat to HubSpot](#5-property-sync--tripleseat-to-hubspot)
+6. [Deal Stage Mapping](#6-deal-stage-mapping)
+7. [Static Configuration Values](#7-static-configuration-values)
+8. [Webhook Setup](#8-webhook-setup)
+9. [Deployment Details](#9-deployment-details)
+10. [Environment Variables](#10-environment-variables)
+11. [HubSpot Configuration](#11-hubspot-configuration)
+12. [TripleSeat Configuration](#12-tripleseat-configuration)
+13. [Deduplication Logic](#13-deduplication-logic)
+14. [Known Limitations and Pending Items](#14-known-limitations-and-pending-items)
+
+---
+
+## 1. System Overview
+
+A Node.js middleware application acts as a bridge between HubSpot CRM and TripleSeat event management. It runs on Google Cloud Run and listens for webhooks from both platforms, keeping deals and events in sync in both directions.
+
+```
+HubSpot  ──── webhook ────▶  Middleware  ────▶  TripleSeat
+HubSpot  ◀─── API call ────  Middleware  ◀────  TripleSeat
+```
+
+**Live URL:** `https://tripleseat-831689172447.europe-west1.run.app`
+
+---
+
+## 2. Integration Flow
+
+### Direction 1: HubSpot → TripleSeat
+
+```
+1. Agent updates a HubSpot deal and sets tripleseat_push = Yes
+2. HubSpot workflow fires a webhook to the middleware
+3. Middleware fetches the full deal from HubSpot API
+4. Middleware fetches associated contact(s) from HubSpot API
+5. For each contact:
+     - Search TripleSeat by email
+     - If found  → update the existing TripleSeat contact
+     - If not found → create a new TripleSeat contact
+6. For the primary contact:
+     - If tripleseat_event_id is blank → create a new TripleSeat event
+     - If tripleseat_event_id is set   → update the existing TripleSeat event
+7. After first-time creation, the new TripleSeat event ID is written back
+   to the HubSpot deal as tripleseat_event_id (cross-system link)
+```
+
+### Direction 2: TripleSeat → HubSpot
+
+```
+1. Any field on a TripleSeat event is updated (amount, status, date, etc.)
+2. TripleSeat fires a webhook to the middleware
+3. Middleware looks up the linked HubSpot deal via tripleseat_event_id
+4. If a deal is found, changed fields are synced back to HubSpot
+5. Only fields that have actually changed are written (no unnecessary updates)
+```
+
+---
+
+## 3. Trigger Points
+
+### HubSpot → TripleSeat Trigger
+
+| Setting | Value |
+|---|---|
+| Property | `tripleseat_push` |
+| Trigger value | `Yes` (true) |
+| How to use | Set this property to Yes on any deal to push it to TripleSeat. Set it again to re-sync updates. |
+
+After the sync completes, the middleware does **not** automatically reset `tripleseat_push` back to No. To re-sync an updated deal, the agent must set it to Yes again.
+
+### TripleSeat → HubSpot Trigger
+
+The middleware receives automatic webhooks from TripleSeat on:
+- **Update Event** - any field change on a TripleSeat event
+- **Delete Event** - event deletion (currently logged, no HubSpot action taken)
+
+---
+
+## 4. Property Sync - HubSpot to TripleSeat
+
+### Deal Properties
+
+| HubSpot Property (Internal Name) | HubSpot Label | TripleSeat Field | Notes |
+|---|---|---|---|
+| `dealname` | Deal Name | `name` | Event name in TripleSeat |
+| `dealstage` | Deal Stage | `status` | Mapped via stage mapping table |
+| `event_date` | Event Date | `event_date`, `event_start`, `event_end` | Date-only field. Start time = current time at sync. End time = start + 1 hour |
+| `amount` | Amount | `actual_amount` | Deal value in dollars |
+| `number_of_guests__cloned__` | Number of Guests | `guest_count` | Integer |
+| `lead_source` | Lead Source | `selected_lead_sources` | Sent as an array |
+| `event_details` | Event Details | `description` | Multi-line text / Additional Information |
+
+### Contact Properties
+
+| HubSpot Property | TripleSeat Field |
+|---|---|
+| `firstname` | `first_name` |
+| `lastname` | `last_name` |
+| `email` | `email_addresses[].address` |
+| `phone` | `phone_numbers[].number` |
+
+---
+
+## 5. Property Sync - TripleSeat to HubSpot
+
+These fields are synced back to the HubSpot deal when a TripleSeat Update Event webhook fires.
+
+| TripleSeat Field | HubSpot Property | Notes |
+|---|---|---|
+| `status` | `dealstage` | Mapped via reverse stage mapping. TENTATIVE and PROSPECT only update if deal stage changes. |
+| `actual_amount` | `amount` | Only synced if value is > 0 and differs from current |
+| `guest_count` | `number_of_guests__cloned__` | Integer |
+| `event_date_iso8601` | `event_date` | ISO date from TripleSeat; converted to HubSpot midnight UTC timestamp |
+| `description` | `event_details` | Additional Information field |
+| `name` | `dealname` | Event name |
+
+---
+
+## 6. Deal Stage Mapping
+
+### HubSpot → TripleSeat (Forward)
+
+| HubSpot Stage | HubSpot Stage ID | TripleSeat Status |
+|---|---|---|
+| Qualified Lead | 2822434791 | PROSPECT |
+| Tour Booked | 2822424509 | PROSPECT |
+| Tour Complete | 2847159289 | PROSPECT |
+| Preparing Proposal | 2847160250 | TENTATIVE |
+| Quote Sent | 2822434792 | TENTATIVE |
+| Contract Sent | 2822434793 | TENTATIVE |
+| Closed Won | 2822434794 | DEFINITE |
+| Closed Lost | 2822434795 | LOST |
+
+### TripleSeat → HubSpot (Reverse)
+
+| TripleSeat Status | HubSpot Stage | Notes |
+|---|---|---|
+| PROSPECT | Qualified Lead | |
+| TENTATIVE | Contract Sent | Represents highest pre-deposit stage |
+| DEFINITE | Closed Won | Deposit or full balance received |
+| CLOSED | Closed Won | Final numbers entered |
+| LOST | Closed Lost | |
+| WAITLIST | Qualified Lead | |
+
+---
+
+## 7. Static Configuration Values
+
+These values are currently hardcoded in the middleware. They must be updated in the code and redeployed if the venue, location, or room changes.
+
+| Value | Current Setting | Where Used | File |
+|---|---|---|---|
+| `location_id` | `20271` | All event create/update calls | `tripleseatService.js` |
+| `room_ids` | `[238254]` | All event create/update calls | `tripleseatService.js` |
+| `account_id` | Read from env `TRIPLESEAT_ACCOUNT_ID` | All TripleSeat API calls | Environment variable |
+| Booking block | **Commented out** | Pending client decision | `tripleseatService.js` |
+
+> **Note:** The `booking` block (booking status and source) has been commented out pending a future decision. It can be re-enabled by uncommenting lines in `tripleseatService.js` (`buildEventData` and `updateEvent` functions).
+
+---
+
+## 8. Webhook Setup
+
+### HubSpot Webhook (HubSpot → Middleware)
+
+| Setting | Value |
+|---|---|
+| Endpoint URL | `https://tripleseat-831689172447.europe-west1.run.app/webhook/hubspot` |
+| Method | POST |
+| Trigger | Property change: `tripleseat_push` = `true` |
+| Setup location | HubSpot → Workflows → [Your Workflow] → Webhook Action |
+
+**Steps to configure in HubSpot:**
+1. Go to Automation → Workflows
+2. Create or edit a deal-based workflow
+3. Set enrollment trigger: Deal property `tripleseat_push` is equal to `true`
+4. Add action: Send webhook → POST to the URL above
+5. Enable re-enrollment so the workflow fires again when the property is set again
+
+### TripleSeat Webhook (TripleSeat → Middleware)
+
+| Setting | Value |
+|---|---|
+| Endpoint URL | `https://tripleseat-831689172447.europe-west1.run.app/webhook/tripleseat` |
+| Method | POST |
+| Trigger Actions | Update Event |
+| Signing Key | Set in TripleSeat and stored in env as `TRIPLESEAT_SIGNING_KEY` |
+| Setup location | TripleSeat → Settings → Webhooks → Add Webhook |
+
+**Steps to configure in TripleSeat:**
+1. Go to Settings → Webhook Endpoints
+2. Click Add Webhook
+3. Set URL to the endpoint above
+4. Check: **Update Event**
+5. Copy the Signing Key and save it as `TRIPLESEAT_SIGNING_KEY` in Cloud Run environment variables
+
+---
+
+## 9. Deployment Details
+
+| Item | Value |
+|---|---|
+| Platform | Google Cloud Run |
+| Region | europe-west1 |
+| Project | hubs-tripleseat-the-factory |
+| Service Name | tripleseat |
+| Live URL | `https://tripleseat-831689172447.europe-west1.run.app` |
+| Runtime | Node.js 22 |
+| Source | Git repository (auto-deploy on push) |
+
+### Health Check
+
+Visit `/health` to confirm the service is running and authenticated:
+
+```
+https://tripleseat-831689172447.europe-west1.run.app/health
+```
+
+Both `tripleseat.authenticated` and `hubspot.hasToken` should be `true` for full operation.
+
+### Viewing Logs
+
+```bash
+gcloud logging read \
+  "resource.type=cloud_run_revision AND resource.labels.service_name=tripleseat" \
+  --project=hubs-tripleseat-the-factory \
+  --limit=100 \
+  --freshness=30m \
+  --format="value(textPayload)"
+```
+
+Or stream live:
+
+```bash
+gcloud beta run services logs tail tripleseat \
+  --project=hubs-tripleseat-the-factory \
+  --region=europe-west1
+```
+
+---
+
+## 10. Environment Variables
+
+These must be set in Cloud Run → Service → Edit → Variables & Secrets.
+
+| Variable | Description | Required |
+|---|---|---|
+| `HUBSPOT_TOKEN` | HubSpot Private App access token | Yes |
+| `TRIPLESEAT_CLIENT_ID` | TripleSeat OAuth2 client ID | Yes |
+| `TRIPLESEAT_CLIENT_SECRET` | TripleSeat OAuth2 client secret | Yes |
+| `TRIPLESEAT_BASE_URL` | `https://api.tripleseat.com` | Yes |
+| `TRIPLESEAT_ACCOUNT_ID` | TripleSeat account ID (e.g. 43553180) | Yes |
+| `TRIPLESEAT_SIGNING_KEY` | Webhook signing key from TripleSeat settings | Optional (recommended) |
+| `NODE_ENV` | Set to `production` | Yes |
+| `PORT` | Port for the server (Cloud Run sets this automatically) | Auto |
+
+---
+
+## 11. HubSpot Configuration
+
+### Required Custom Properties on Deals
+
+These properties must exist in HubSpot under CRM → Properties → Deal Properties.
+
+| Display Name | Internal Name | Type | Purpose |
+|---|---|---|---|
+| TripleSeat Push | `tripleseat_push` | Checkbox / Boolean | Trigger to push deal to TripleSeat |
+| TripleSeat Event ID | `tripleseat_event_id` | Single-line text | Stores the linked TripleSeat event ID (written by middleware) |
+| Event Date | `event_date` | Date picker | The event date (internal name: `event_date`) |
+| Number of Guests | `number_of_guests__cloned__` | Number | Guest count |
+| Event Details | `event_details` | Multi-line text | Additional event information / description |
+
+> **Note:** The Event Date property was originally created with the internal name `wedding_date` but has since been corrected. Confirm the internal name is `event_date` in your HubSpot portal under Properties.
+
+### HubSpot API Access
+
+- Authentication: Private App token (Bearer token)
+- Token stored in environment variable: `HUBSPOT_TOKEN`
+- Required scopes: `crm.objects.deals.read`, `crm.objects.deals.write`, `crm.objects.contacts.read`
+
+---
+
+## 12. TripleSeat Configuration
+
+### API Authentication
+
+TripleSeat uses OAuth2 client credentials. The middleware automatically requests and caches tokens, refreshing before expiry.
+
+- Client ID: stored in `TRIPLESEAT_CLIENT_ID`
+- Client Secret: stored in `TRIPLESEAT_CLIENT_SECRET`
+- Token endpoint: `https://api.tripleseat.com/oauth/token`
+
+### Contact Deduplication
+
+Before creating a contact in TripleSeat, the middleware searches by email using `GET /v1/contacts/search.json?query={email}`. If a match is found, the existing contact is updated. No duplicates are created.
+
+---
+
+## 13. Deduplication Logic
+
+### Event Deduplication
+
+After the first sync, the TripleSeat event ID is stored on the HubSpot deal (`tripleseat_event_id`). On all subsequent syncs:
+
+- If `tripleseat_event_id` is **blank** → create new event
+- If `tripleseat_event_id` is **set** → update existing event
+
+This prevents duplicate events from being created if the workflow fires multiple times.
+
+### Contact Deduplication
+
+- Search TripleSeat for the contact by exact email address
+- If found → update name and phone with latest HubSpot data
+- If not found → create new contact
+
+---
+
+## 14. Known Limitations and Pending Items
+
+| Item | Status | Notes |
+|---|---|---|
+| Booking block | Commented out | The `booking` sub-object (status + source) is disabled. Re-enable when ready by uncommenting in `tripleseatService.js` |
+| Event end time | Auto-calculated | TripleSeat `event_end` is set to `event_start + 1 hour`. No dedicated end time field is mapped from HubSpot. |
+| Event start time | Current wall-clock time | Since HubSpot only stores a date (no time), `event_start` uses the server's current time at the moment of sync. On updates, the original time is preserved unless the date changes. |
+| `guest_count` field name | To be confirmed | The TripleSeat webhook payload field for guest count has not yet been confirmed from a live payload. The middleware reads `guest_count`. |
+| TripleSeat auth unhealthy | Needs fix | Cloud Run env vars `TRIPLESEAT_CLIENT_ID` / `TRIPLESEAT_CLIENT_SECRET` appear missing or incorrect. Confirm these are set under Cloud Run → Edit → Variables. |
+| Lead source reverse sync | Commented out | Syncing `selected_lead_sources` back from TripleSeat to HubSpot is currently disabled. Can be re-enabled in `tripleseatController.js`. |
+
+---
+
+*Document generated from live codebase. For questions contact TrooInbound.*

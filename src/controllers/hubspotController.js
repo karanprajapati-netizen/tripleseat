@@ -63,38 +63,49 @@ exports.handleWebhook = async (req, res) => {
         continue;
       }
 
+      const dealName = deal.properties.dealname || `Deal ${dealId}`;
+      const errorLogs = [];
+
+      // Helper: extract a readable error message from an API error
+      const apiErrorMsg = (err) => {
+        const detail = err.response?.data?.errors;
+        if (detail) return JSON.stringify(detail).replace(/[{}"]/g, '').trim();
+        return err.message;
+      };
+
       // --------------------------------------------------
-      // YOUR EXISTING LOGIC (UNCHANGED)
+      // CONTACTS
       // --------------------------------------------------
       const contactIds = await hubspot.getAssociatedContacts(dealId);
 
-      if (!contactIds?.length) continue;
+      if (!contactIds?.length) {
+        const msg = `No contacts are associated with this deal. Event was not created.`;
+        logger.webhook(msg, { dealId });
+        await hubspot.setErrorLog(dealId, `[${new Date().toUTCString()}]\n• ${msg}`);
+        continue;
+      }
 
       const existingTsEventId = deal.properties.tripleseat_event_id;
       logger.webhook("Existing Tripleseat event ID on deal", { dealId, existingTsEventId });
-      
 
-      // Only process the primary contact (first associated)
       const primaryContactId = contactIds[0];
       let tsEventId = null;
 
       for (const contactId of contactIds) {
+        let contactEmail = contactId;
         try {
           const contact = await hubspot.getContact(contactId);
+          contactEmail = contact.properties?.email || contactId;
+
           const tsContact = await tripleseat.createContact(contact.properties);
-          logger.webhook("Contact pushed", {
-            contactId,
-            tsId: tsContact.contact?.id
-          });
+          logger.webhook("Contact pushed", { contactId, tsId: tsContact.contact?.id });
 
           if (contactId === primaryContactId) {
             if (existingTsEventId) {
-              // Event already exists - update it with latest deal data
               await tripleseat.updateEvent(existingTsEventId, deal.properties, tsContact.contact?.id, dealId);
               logger.webhook("Event updated", { eventId: existingTsEventId });
               tsEventId = existingTsEventId;
             } else {
-              // First sync - create a new event
               const tsEvent = await tripleseat.createEvent(deal.properties, tsContact.contact?.id, dealId);
               tsEventId = tsEvent.event?.id;
               logger.webhook("Event created", { eventId: tsEventId });
@@ -102,21 +113,37 @@ exports.handleWebhook = async (req, res) => {
           }
 
         } catch (err) {
-          logger.error("Contact failed", {
-            contactId,
-            error: err.message
-          });
+          const msg = contactId === primaryContactId
+            ? `Failed to sync contact (${contactEmail}) and event was not created: ${apiErrorMsg(err)}`
+            : `Failed to sync contact (${contactEmail}): ${apiErrorMsg(err)}`;
+          errorLogs.push(msg);
+          logger.error("Contact/event sync failed", { contactId, dealId, error: err.message });
         }
       }
 
-      // Write the Tripleseat event ID back to the HubSpot deal (only needed on first create)
+      // --------------------------------------------------
+      // WRITE TRIPLESEAT EVENT ID BACK (first create only)
+      // --------------------------------------------------
       if (tsEventId && !existingTsEventId) {
         try {
           await hubspot.updateDeal(dealId, { tripleseat_event_id: String(tsEventId) });
           logger.webhook("Tripleseat event ID saved to HubSpot deal", { dealId, tsEventId });
         } catch (err) {
+          const msg = `Event created (ID: ${tsEventId}) but failed to save TripleSeat ID back to deal: ${err.message}`;
+          errorLogs.push(msg);
           logger.error("Failed to save tripleseat_event_id to deal", { dealId, error: err.message });
         }
+      }
+
+      // --------------------------------------------------
+      // WRITE ERROR LOG TO HUBSPOT DEAL
+      // --------------------------------------------------
+      if (errorLogs.length > 0) {
+        const body = errorLogs.map(e => `• ${e}`).join('\n');
+        await hubspot.setErrorLog(dealId, `[${new Date().toUTCString()}]\n${body}`);
+      } else {
+        // Clear the field - empty = last sync was clean
+        await hubspot.setErrorLog(dealId, '');
       }
     }
 

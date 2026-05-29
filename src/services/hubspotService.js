@@ -156,6 +156,21 @@ exports.findDealByTripleseatEventId = async (tripleseatEventId) => {
   }
 };
 
+// Write a message to the tripleseat_error_logs property on a deal.
+// Pass an empty string to clear the field after a successful sync.
+exports.setErrorLog = async (dealId, message) => {
+  try {
+    await axios.patch(
+      `${BASE_URL}/crm/v3/objects/deals/${dealId}`,
+      { properties: { tripleseat_error_logs: message } },
+      { headers }
+    );
+  } catch (err) {
+    // Non-fatal - log locally but don't throw so main flow is unaffected
+    logger.error(`Failed to write error log to deal ${dealId}`, { error: err.message });
+  }
+};
+
 // Update Deal properties (used to write back Tripleseat IDs)
 exports.updateDeal = async (dealId, properties) => {
   const startTime = Date.now();

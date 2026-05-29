@@ -91,24 +91,36 @@ exports.createContact = async (contact) => {
   try {
     const existingContact = await exports.findContactByEmail(contact.email);
 
-    const contactData = {
-      first_name: contact.firstname || "",
-      last_name: contact.lastname || "",
-      account_id: ACCOUNT_ID,
-      email_addresses: [{ address: contact.email, label: "Work" }],
-      phone_numbers: contact.phone ? [{ number: contact.phone, label: "Work" }] : []
-    };
-
     const headers = await auth.getHeaders();
 
     if (existingContact) {
+      // On update, include existing IDs for email and phone so TripleSeat
+      // updates in-place instead of appending duplicate entries
+      const existingEmailId = existingContact.email_addresses?.[0]?.id;
+      const existingPhoneId = existingContact.phone_numbers?.[0]?.id;
+
+      const updateData = {
+        first_name: contact.firstname || "",
+        last_name: contact.lastname || "",
+        email_addresses: existingEmailId
+          ? [{ id: existingEmailId, address: contact.email }]
+          : [{ address: contact.email }],
+        phone_numbers: contact.phone
+          ? existingPhoneId
+            ? [{ id: existingPhoneId, number: contact.phone, phone_number_type: "Work" }]
+            : [{ number: contact.phone, phone_number_type: "Work" }]
+          : []
+      };
+
       logger.tripleseat(`Updating existing contact for ${contact.email}`, {
-        contactId: existingContact.id
+        contactId: existingContact.id,
+        existingEmailId,
+        existingPhoneId
       });
 
       const res = await axios.put(
         `${BASE_URL}/v1/contacts/${existingContact.id}.json`,
-        { contact: contactData },
+        { contact: updateData },
         { headers }
       );
 
@@ -128,9 +140,17 @@ exports.createContact = async (contact) => {
       accountId: ACCOUNT_ID
     });
 
+    const createData = {
+      first_name: contact.firstname || "",
+      last_name: contact.lastname || "",
+      account_id: ACCOUNT_ID,
+      email_addresses: [{ address: contact.email }],
+      phone_numbers: contact.phone ? [{ number: contact.phone, phone_number_type: "Work" }] : []
+    };
+
     const res = await axios.post(
       `${BASE_URL}/v1/contacts.json`,
-      { contact: contactData },
+      { contact: createData },
       { headers }
     );
 
