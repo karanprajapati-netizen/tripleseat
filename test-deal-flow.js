@@ -50,7 +50,7 @@ async function testDealFlow() {
           );
           console.log("Update response:", updated);
           tsEventId = existingTsEventId;
-          console.log(`✅ Event updated: ${tsEventId}`);
+          console.log(` Event updated: ${tsEventId}`);
         } else {
           console.log("\n=== STEP 4: CREATE new TripleSeat event ===");
           const tsEvent = await tripleseat.createEvent(
@@ -60,7 +60,7 @@ async function testDealFlow() {
           );
           console.log("Create response:", tsEvent);
           tsEventId = tsEvent.event?.id;
-          console.log(`✅ Event created: ${tsEventId}`);
+          console.log(` Event created: ${tsEventId}`);
         }
       }
     }
@@ -69,7 +69,7 @@ async function testDealFlow() {
     if (tsEventId && !existingTsEventId) {
       console.log("\n=== STEP 5: Save tripleseat_event_id back to HubSpot ===");
       await hubspot.updateDeal(sampleDealId, { tripleseat_event_id: String(tsEventId) });
-      console.log(`✅ tripleseat_event_id saved to HubSpot deal: ${tsEventId}`);
+      console.log(` tripleseat_event_id saved to HubSpot deal: ${tsEventId}`);
     } else if (existingTsEventId) {
       console.log("\n=== STEP 5: Skipped - event already existed, ID unchanged ===");
     } else {
@@ -77,7 +77,7 @@ async function testDealFlow() {
     }
 
   } catch (error) {
-    console.error("\n❌ Test failed:", error.message);
+    console.error("\n Test failed:", error.message);
     if (error.response?.data) {
       console.error("Response data:", JSON.stringify(error.response.data, null, 2));
     }

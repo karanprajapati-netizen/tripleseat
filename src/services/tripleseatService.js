@@ -241,6 +241,7 @@ function buildEventData(deal, contactId) {
       event_end: eventEnd,
       location_id: 20271,
       room_ids: [238254],
+      owned_by: 220867, // Assign to specific user in TripleSeat (optional)
       description: deal.event_details || "",
       ...(dealAmount ? { actual_amount: dealAmount } : {}),
       ...(guestCount ? { guest_count: guestCount } : {}),

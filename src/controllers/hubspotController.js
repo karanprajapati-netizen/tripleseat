@@ -7,7 +7,7 @@ exports.handleWebhook = async (req, res) => {
 
   let events = [];
 
-  // 🔥 Handle HubSpot array payload
+  //  Handle HubSpot array payload
   if (Array.isArray(req.body)) {
     events = req.body;
   } else {
