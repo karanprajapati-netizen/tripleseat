@@ -85,6 +85,29 @@ exports.handleWebhook = async (req, res) => {
         continue;
       }
 
+      // --------------------------------------------------
+      // RESOLVE TRIPLESEAT OWNER FROM HUBSPOT DEAL OWNER
+      // --------------------------------------------------
+      let tsOwnedById = 220867;
+      const hubspotOwnerId = deal.properties.hubspot_owner_id;
+      if (hubspotOwnerId) {
+        const owner = await hubspot.getOwner(hubspotOwnerId);
+        if (owner?.email) {
+          const tsUser = await tripleseat.findUserByEmail(owner.email);
+          if (tsUser?.id) {
+            tsOwnedById = tsUser.id;
+            logger.webhook("Resolved TripleSeat owner from HubSpot deal owner", {
+              dealId,
+              hubspotOwnerId,
+              email: owner.email,
+              tsUserId: tsUser.id
+            });
+          } else {
+            logger.webhook("No matching TripleSeat user - using default owner", { dealId, email: owner.email });
+          }
+        }
+      }
+
       const existingTsEventId = deal.properties.tripleseat_event_id;
       logger.webhook("Existing Tripleseat event ID on deal", { dealId, existingTsEventId });
 
@@ -102,11 +125,11 @@ exports.handleWebhook = async (req, res) => {
 
           if (contactId === primaryContactId) {
             if (existingTsEventId) {
-              await tripleseat.updateEvent(existingTsEventId, deal.properties, tsContact.contact?.id, dealId);
+              await tripleseat.updateEvent(existingTsEventId, deal.properties, tsContact.contact?.id, dealId, tsOwnedById);
               logger.webhook("Event updated", { eventId: existingTsEventId });
               tsEventId = existingTsEventId;
             } else {
-              const tsEvent = await tripleseat.createEvent(deal.properties, tsContact.contact?.id, dealId);
+              const tsEvent = await tripleseat.createEvent(deal.properties, tsContact.contact?.id, dealId, tsOwnedById);
               tsEventId = tsEvent.event?.id;
               logger.webhook("Event created", { eventId: tsEventId });
             }

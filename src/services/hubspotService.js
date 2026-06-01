@@ -81,7 +81,7 @@ exports.getDeal = async (dealId) => {
     logger.hubspot(`Fetching deal ${dealId}`);
     
     const res = await axios.get(
-      `${BASE_URL}/crm/v3/objects/deals/${dealId}?properties=dealname,dealstage,tripleseat_push,event_date,amount,tripleseat_event_id,number_of_guests__cloned__,lead_source,event_details`,
+      `${BASE_URL}/crm/v3/objects/deals/${dealId}?properties=dealname,dealstage,tripleseat_push,event_date,amount,tripleseat_event_id,number_of_guests__cloned__,lead_source,event_details,hubspot_owner_id`,
       { headers }
     );
 
@@ -199,6 +199,39 @@ exports.updateDeal = async (dealId, properties) => {
       response: error.response?.data
     });
     throw error;
+  }
+};
+
+// Get a HubSpot owner by ID (returns email and name)
+// Tries v3 first; falls back to v2 if the token lacks crm.objects.owners.read scope
+exports.getOwner = async (ownerId) => {
+  try {
+    const res = await axios.get(
+      `${BASE_URL}/crm/v3/owners/${ownerId}`,
+      { headers }
+    );
+    return res.data;
+  } catch (err) {
+    if (err.response?.status === 403) {
+      try {
+        const res = await axios.get(
+          `${BASE_URL}/owners/v2/owners/${ownerId}`,
+          { headers }
+        );
+        return res.data;
+      } catch (fallbackErr) {
+        logger.error(`Failed to fetch HubSpot owner ${ownerId} (v2 fallback)`, {
+          error: fallbackErr.message,
+          status: fallbackErr.response?.status
+        });
+        return null;
+      }
+    }
+    logger.error(`Failed to fetch HubSpot owner ${ownerId}`, {
+      error: err.message,
+      status: err.response?.status
+    });
+    return null;
   }
 };
 

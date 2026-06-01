@@ -194,8 +194,44 @@ function formatDateOnly(date) {
   return `${month}/${day}/${year}`;
 }
 
+// Find a TripleSeat user by email address
+exports.findUserByEmail = async (email) => {
+  try {
+    const headers = await auth.getHeaders();
+    const res = await axios.get(
+      `${BASE_URL}/v1/users/search.json`,
+      { headers, params: { query: email } }
+    );
+    logger.tripleseat(`User search raw response`, {
+      email,
+      topLevelKeys: Object.keys(res.data || {}),
+      isArray: Array.isArray(res.data),
+      rawPreview: JSON.stringify(res.data).substring(0, 800)
+    });
+
+    const users = Array.isArray(res.data)
+      ? res.data
+      : res.data.users || res.data.results || [];
+
+    const emailLower = email.toLowerCase();
+    const match = users.find(u => u.email?.toLowerCase() === emailLower);
+    if (match) {
+      logger.tripleseat(`Found TripleSeat user for email ${email}`, { userId: match.id });
+    } else {
+      logger.tripleseat(`No TripleSeat user found for email ${email}`, {
+        totalReturned: users.length,
+        returnedEmails: users.map(u => u.email)
+      });
+    }
+    return match || null;
+  } catch (error) {
+    logger.error(`Failed to search TripleSeat user by email: ${email}`, { error: error.message });
+    return null;
+  }
+};
+
 // Build the TripleSeat event payload from a HubSpot deal
-function buildEventData(deal, contactId) {
+function buildEventData(deal, contactId, ownedById = 220867) {
   // event_date is date-only from HubSpot; use current time for start, +1hr for end
   const now = new Date();
   const endTime = new Date(now.getTime() + 60 * 60 * 1000);
@@ -241,7 +277,7 @@ function buildEventData(deal, contactId) {
       event_end: eventEnd,
       location_id: 20271,
       room_ids: [238254],
-      owned_by: 220867, // Assign to specific user in TripleSeat (optional)
+      owned_by: ownedById,
       description: deal.event_details || "",
       ...(dealAmount ? { actual_amount: dealAmount } : {}),
       ...(guestCount ? { guest_count: guestCount } : {}),
@@ -255,7 +291,7 @@ function buildEventData(deal, contactId) {
 }
 
 // Create Event
-exports.createEvent = async (deal, contactId, hubspotDealId) => {
+exports.createEvent = async (deal, contactId, hubspotDealId, ownedById = 220867) => {
   const startTime = Date.now();
 
   try {
@@ -270,7 +306,7 @@ exports.createEvent = async (deal, contactId, hubspotDealId) => {
     });
 
     const headers = await auth.getHeaders();
-    const { eventStart, eventEnd, payload } = buildEventData(deal, contactId);
+    const { eventStart, eventEnd, payload } = buildEventData(deal, contactId, ownedById);
 
     const res = await axios.post(
       `${BASE_URL}/v1/events.json`,
@@ -312,7 +348,7 @@ async function getEvent(tsEventId) {
 }
 
 // Update existing TripleSeat event from updated HubSpot deal
-exports.updateEvent = async (tsEventId, deal, contactId, hubspotDealId) => {
+exports.updateEvent = async (tsEventId, deal, contactId, hubspotDealId, ownedById = 220867) => {
   const startTime = Date.now();
 
   try {
@@ -395,6 +431,7 @@ exports.updateEvent = async (tsEventId, deal, contactId, hubspotDealId) => {
       event_end: eventEnd,
       location_id: 20271,
       room_ids: [238254],
+      owned_by: ownedById,
       description: deal.event_details || "",
       ...(dealAmount ? { actual_amount: dealAmount } : {}),
       ...(guestCount ? { guest_count: guestCount } : {}),
