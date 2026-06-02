@@ -203,7 +203,7 @@ exports.updateDeal = async (dealId, properties) => {
 };
 
 // Get a HubSpot owner by ID (returns email and name)
-// Tries v3 first; falls back to v2 if the token lacks crm.objects.owners.read scope
+// Tries v3 first; falls back to v2 if the token lacks crm.objects.owners.
 exports.getOwner = async (ownerId) => {
   try {
     const res = await axios.get(

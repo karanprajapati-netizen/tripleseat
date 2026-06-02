@@ -20,7 +20,6 @@ class TripleseatAuth {
   async getAccessToken() {
     const startTime = Date.now();
     
-    // Check if we have a valid token
     if (this.accessToken && this.tokenExpiry && Date.now() < this.tokenExpiry) {
       const timeUntilExpiry = Math.round((this.tokenExpiry - Date.now()) / 1000);
       logger.auth(`Using cached token (expires in ${timeUntilExpiry}s)`);

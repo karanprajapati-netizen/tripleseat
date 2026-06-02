@@ -552,7 +552,7 @@ const DEAL_STAGE_TO_TS_STATUS = {
   '2822434792': 'TENTATIVE',  // Quote Sent
   '2822434793': 'TENTATIVE',  // Contract Sent
   '2822434794': 'DEFINITE',   // Closed Won
-  '2822434795': 'LOST'        // Closed Lost
+  '2822434795': 'LOST'        // Lost
 };
 
 function mapDealStageToEventStatus(dealStage) {

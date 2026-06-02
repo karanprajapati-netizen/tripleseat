@@ -58,7 +58,6 @@ exports.handleWebhook = async (req, res) => {
       // FETCH DEAL (always fresh - webhook payload may have incomplete properties)
       // --------------------------------------------------
       const deal = await hubspot.getDeal(dealId);
-
       if (deal.properties.tripleseat_push !== "true") {
         continue;
       }
