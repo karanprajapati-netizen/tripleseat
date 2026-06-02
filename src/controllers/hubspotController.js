@@ -111,37 +111,94 @@ exports.handleWebhook = async (req, res) => {
       const existingTsEventId = deal.properties.tripleseat_event_id;
       logger.webhook("Existing Tripleseat event ID on deal", { dealId, existingTsEventId });
 
+      // Only the first contact is used for syncing and event creation
       const primaryContactId = contactIds[0];
       let tsEventId = null;
 
-      for (const contactId of contactIds) {
-        let contactEmail = contactId;
-        try {
-          const contact = await hubspot.getContact(contactId);
-          contactEmail = contact.properties?.email || contactId;
+      // --------------------------------------------------
+      // RESOLVE DYNAMIC TRIPLESEAT ACCOUNT
+      // Scenario 1: deal has an associated HubSpot company (primary if multiple)
+      //   -> search Tripleseat by company name; use found or create new
+      // Scenario 2: no associated company
+      //   -> create (or find existing) account using primary contact's full name
+      // Errors here are fatal for this deal - logged to TripleSeat Error logs.
+      // --------------------------------------------------
+      let tsAccountId = null;
+      let cachedPrimaryContact = null; // avoid double-fetch when Scenario 2 already called getContact
 
-          const tsContact = await tripleseat.createContact(contact.properties);
-          logger.webhook("Contact pushed", { contactId, tsId: tsContact.contact?.id });
+      try {
+        const company = await hubspot.getAssociatedCompany(dealId);
 
-          if (contactId === primaryContactId) {
-            if (existingTsEventId) {
-              await tripleseat.updateEvent(existingTsEventId, deal.properties, tsContact.contact?.id, dealId, tsOwnedById);
-              logger.webhook("Event updated", { eventId: existingTsEventId });
-              tsEventId = existingTsEventId;
-            } else {
-              const tsEvent = await tripleseat.createEvent(deal.properties, tsContact.contact?.id, dealId, tsOwnedById);
-              tsEventId = tsEvent.event?.id;
-              logger.webhook("Event created", { eventId: tsEventId });
-            }
+        if (company?.name) {
+          // --- Scenario 1 ---
+          logger.webhook("Scenario 1: deal has associated company, resolving Tripleseat account", {
+            dealId,
+            companyName: company.name
+          });
+
+          const existingAccount = await tripleseat.findAccountByName(company.name);
+
+          if (existingAccount) {
+            tsAccountId = existingAccount.id;
+            logger.webhook("Using existing Tripleseat account", { dealId, accountId: tsAccountId, companyName: company.name });
+          } else {
+            const newAccount = await tripleseat.createAccount(company.name, tsOwnedById, company.domain, company.phone);
+            tsAccountId = newAccount.id;
+            logger.webhook("Created new Tripleseat account from company name", { dealId, accountId: tsAccountId, companyName: company.name, domain: company.domain || "none", phone: company.phone || "none" });
           }
+        } else {
+          // --- Scenario 2 ---
+          logger.webhook("Scenario 2: no associated company, resolving account from primary contact name", { dealId, primaryContactId });
 
-        } catch (err) {
-          const msg = contactId === primaryContactId
-            ? `Failed to sync contact (${contactEmail}) and event was not created: ${apiErrorMsg(err)}`
-            : `Failed to sync contact (${contactEmail}): ${apiErrorMsg(err)}`;
-          errorLogs.push(msg);
-          logger.error("Contact/event sync failed", { contactId, dealId, error: err.message });
+          cachedPrimaryContact = await hubspot.getContact(primaryContactId);
+          const firstName = cachedPrimaryContact.properties?.firstname || "";
+          const lastName = cachedPrimaryContact.properties?.lastname || "";
+          const accountName = `${firstName} ${lastName}`.trim() || `Contact ${primaryContactId}`;
+
+          const existingAccount = await tripleseat.findAccountByName(accountName);
+
+          if (existingAccount) {
+            tsAccountId = existingAccount.id;
+            logger.webhook("Using existing Tripleseat account matched by contact name", { dealId, accountId: tsAccountId, accountName });
+          } else {
+            const newAccount = await tripleseat.createAccount(accountName, tsOwnedById, null, cachedPrimaryContact.properties?.phone);
+            tsAccountId = newAccount.id;
+            logger.webhook("Created new Tripleseat account from contact name", { dealId, accountId: tsAccountId, accountName, phone: cachedPrimaryContact.properties?.phone || "none" });
+          }
         }
+      } catch (err) {
+        const msg = `Failed to resolve Tripleseat account: ${apiErrorMsg(err)}`;
+        errorLogs.push(msg);
+        logger.error("Account resolution failed - skipping event creation", { dealId, error: err.message });
+        await hubspot.setErrorLog(dealId, `[${new Date().toUTCString()}]\n• ${msg}`);
+        continue;
+      }
+
+      // --------------------------------------------------
+      // SYNC PRIMARY CONTACT + CREATE / UPDATE EVENT
+      // Only the first associated contact is processed.
+      // --------------------------------------------------
+      let contactEmail = primaryContactId;
+      try {
+        const contact = cachedPrimaryContact || await hubspot.getContact(primaryContactId);
+        contactEmail = contact.properties?.email || primaryContactId;
+
+        const tsContact = await tripleseat.createContact(contact.properties, tsAccountId);
+        logger.webhook("Contact pushed", { contactId: primaryContactId, tsId: tsContact.contact?.id, accountId: tsAccountId });
+
+        if (existingTsEventId) {
+          await tripleseat.updateEvent(existingTsEventId, deal.properties, tsContact.contact?.id, dealId, tsOwnedById, tsAccountId);
+          logger.webhook("Event updated", { eventId: existingTsEventId, accountId: tsAccountId });
+          tsEventId = existingTsEventId;
+        } else {
+          const tsEvent = await tripleseat.createEvent(deal.properties, tsContact.contact?.id, dealId, tsOwnedById, tsAccountId);
+          tsEventId = tsEvent.event?.id;
+          logger.webhook("Event created", { eventId: tsEventId, accountId: tsAccountId });
+        }
+      } catch (err) {
+        const msg = `Failed to sync contact (${contactEmail}) and event was not created: ${apiErrorMsg(err)}`;
+        errorLogs.push(msg);
+        logger.error("Contact/event sync failed", { contactId: primaryContactId, dealId, error: err.message });
       }
 
       // --------------------------------------------------

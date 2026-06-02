@@ -235,6 +235,45 @@ exports.getOwner = async (ownerId) => {
   }
 };
 
+// Get associated company for a deal (returns { name, ... } or null)
+exports.getAssociatedCompany = async (dealId) => {
+  logger.hubspot(`Fetching associated company for deal ${dealId}`);
+
+  const assocRes = await axios.get(
+    `${BASE_URL}/crm/v4/objects/deals/${dealId}/associations/companies`,
+    { headers }
+  );
+
+  const results = assocRes.data.results || [];
+
+  if (!results.length) {
+    logger.hubspot(`No company associated with deal ${dealId}`);
+    return null;
+  }
+
+  // Prefer the primary company; fall back to first if none is marked primary
+  const primaryResult = results.find(r =>
+    r.associationTypes?.some(t => t.label === "Primary")
+  ) || results[0];
+
+  const isPrimary = primaryResult.associationTypes?.some(t => t.label === "Primary");
+
+  const companyRes = await axios.get(
+    `${BASE_URL}/crm/v3/objects/companies/${primaryResult.toObjectId}?properties=name,domain,phone`,
+    { headers }
+  );
+
+  const company = companyRes.data.properties;
+  logger.hubspot(`Found associated company`, {
+    dealId,
+    companyId: primaryResult.toObjectId,
+    companyName: company.name,
+    isPrimary,
+    totalAssociated: results.length
+  });
+  return company;
+};
+
 // Get associated contacts for a deal
 exports.getAssociatedContacts = async (dealId) => {
   const startTime = Date.now();

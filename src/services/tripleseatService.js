@@ -5,6 +5,75 @@ const logger = require("../utils/logger");
 const BASE_URL = process.env.TRIPLESEAT_BASE_URL;
 const ACCOUNT_ID = process.env.TRIPLESEAT_ACCOUNT_ID;
 
+// Search for an existing Tripleseat account by exact name
+exports.findAccountByName = async (name) => {
+  try {
+    const headers = await auth.getHeaders();
+    const res = await axios.get(
+      `${BASE_URL}/v1/accounts/search.json`,
+      { headers, params: { query: name } }
+    );
+
+    logger.tripleseat(`Account search response`, {
+      name,
+      topLevelKeys: Object.keys(res.data || {}),
+      rawPreview: JSON.stringify(res.data).substring(0, 600)
+    });
+
+    const accounts = Array.isArray(res.data)
+      ? res.data
+      : res.data.accounts || res.data.results || [];
+
+    const nameLower = name.toLowerCase().trim();
+    const match = accounts.find(a => a.name?.toLowerCase().trim() === nameLower);
+
+    if (match) {
+      logger.tripleseat(`Found existing Tripleseat account`, { name, accountId: match.id });
+      return match;
+    }
+
+    logger.tripleseat(`No existing Tripleseat account found for name: ${name}`);
+    return null;
+  } catch (error) {
+    logger.error(`Failed to search Tripleseat account by name: ${name}`, {
+      error: error.message,
+      status: error.response?.status,
+      response: error.response?.data
+    });
+    throw error;
+  }
+};
+
+// Create a new Tripleseat account
+exports.createAccount = async (name, ownedById, domain, phone) => {
+  try {
+    const headers = await auth.getHeaders();
+    const accountPayload = { name, owned_by: ownedById };
+    if (domain) {
+      accountPayload.websites = [{ url: domain }];
+    }
+    if (phone) {
+      accountPayload.phone_numbers = [{ number: phone, phone_number_type: "Main" }];
+    }
+    const res = await axios.post(
+      `${BASE_URL}/v1/accounts.json`,
+      { account: accountPayload },
+      { headers }
+    );
+
+    const account = res.data.account || res.data;
+    logger.tripleseat(`Tripleseat account created`, { name, accountId: account.id });
+    return account;
+  } catch (error) {
+    logger.error(`Failed to create Tripleseat account: ${name}`, {
+      error: error.message,
+      status: error.response?.status,
+      response: error.response?.data
+    });
+    throw error;
+  }
+};
+
 // Search for existing contact by email
 exports.findContactByEmail = async (email) => {
   const startTime = Date.now();
@@ -85,7 +154,8 @@ exports.findContactByEmail = async (email) => {
 };
 
 // Create or update contact in TripleSeat
-exports.createContact = async (contact) => {
+// accountId is the resolved dynamic Tripleseat account to associate with
+exports.createContact = async (contact, accountId) => {
   const startTime = Date.now();
 
   try {
@@ -102,6 +172,7 @@ exports.createContact = async (contact) => {
       const updateData = {
         first_name: contact.firstname || "",
         last_name: contact.lastname || "",
+        account_id: accountId,
         email_addresses: existingEmailId
           ? [{ id: existingEmailId, address: contact.email }]
           : [{ address: contact.email }],
@@ -137,13 +208,13 @@ exports.createContact = async (contact) => {
     logger.tripleseat(`Creating new contact for ${contact.email}`, {
       name: `${contact.firstname} ${contact.lastname}`,
       phone: contact.phone || 'none',
-      accountId: ACCOUNT_ID
+      accountId
     });
 
     const createData = {
       first_name: contact.firstname || "",
       last_name: contact.lastname || "",
-      account_id: ACCOUNT_ID,
+      account_id: accountId,
       email_addresses: [{ address: contact.email }],
       phone_numbers: contact.phone ? [{ number: contact.phone, phone_number_type: "Work" }] : []
     };
@@ -231,7 +302,7 @@ exports.findUserByEmail = async (email) => {
 };
 
 // Build the TripleSeat event payload from a HubSpot deal
-function buildEventData(deal, contactId, ownedById = 220867) {
+function buildEventData(deal, contactId, ownedById = 220867, accountId) {
   // event_date is date-only from HubSpot; use current time for start, +1hr for end
   const now = new Date();
   const endTime = new Date(now.getTime() + 60 * 60 * 1000);
@@ -271,7 +342,7 @@ function buildEventData(deal, contactId, ownedById = 220867) {
       name: deal.dealname || "Event from HubSpot",
       status: mapDealStageToEventStatus(deal.dealstage),
       contact_id: contactId,
-      account_id: parseInt(ACCOUNT_ID),
+      account_id: parseInt(accountId),
       event_date: tsEventDate,
       event_start: eventStart,
       event_end: eventEnd,
@@ -291,7 +362,7 @@ function buildEventData(deal, contactId, ownedById = 220867) {
 }
 
 // Create Event
-exports.createEvent = async (deal, contactId, hubspotDealId, ownedById = 220867) => {
+exports.createEvent = async (deal, contactId, hubspotDealId, ownedById = 220867, accountId) => {
   const startTime = Date.now();
 
   try {
@@ -306,7 +377,7 @@ exports.createEvent = async (deal, contactId, hubspotDealId, ownedById = 220867)
     });
 
     const headers = await auth.getHeaders();
-    const { eventStart, eventEnd, payload } = buildEventData(deal, contactId, ownedById);
+    const { eventStart, eventEnd, payload } = buildEventData(deal, contactId, ownedById, accountId);
 
     const res = await axios.post(
       `${BASE_URL}/v1/events.json`,
@@ -348,7 +419,7 @@ async function getEvent(tsEventId) {
 }
 
 // Update existing TripleSeat event from updated HubSpot deal
-exports.updateEvent = async (tsEventId, deal, contactId, hubspotDealId, ownedById = 220867) => {
+exports.updateEvent = async (tsEventId, deal, contactId, hubspotDealId, ownedById = 220867, accountId) => {
   const startTime = Date.now();
 
   try {
@@ -425,7 +496,7 @@ exports.updateEvent = async (tsEventId, deal, contactId, hubspotDealId, ownedByI
       name: deal.dealname || "Event from HubSpot",
       status: mapDealStageToEventStatus(deal.dealstage),
       contact_id: contactId,
-      account_id: parseInt(ACCOUNT_ID),
+      account_id: parseInt(accountId),
       event_date: tsEventDate,
       event_start: eventStart,
       event_end: eventEnd,

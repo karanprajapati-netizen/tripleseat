@@ -48,43 +48,82 @@ async function testDealFlow() {
       return;
     }
 
+    // Only the first contact is used for syncing and event creation
     const primaryContactId = contactIds[0];
+    console.log(`Using primary contact: ${primaryContactId} (ignoring ${contactIds.length - 1} additional)`);
     let tsEventId = null;
 
-    for (const contactId of contactIds) {
-      console.log(`\n=== STEP 4: Processing contact ${contactId} ===`);
-      const contact = await hubspot.getContact(contactId);
-      console.log("Contact properties:", contact.properties);
+    // --------------------------------------------------
+    console.log("\n=== STEP 3.5: Resolve dynamic Tripleseat account ===");
+    let tsAccountId = null;
+    let cachedPrimaryContact = null; // cached from Scenario 2 to avoid double fetch
 
-      const tsContact = await tripleseat.createContact(contact.properties);
-      console.log("Tripleseat contact:", tsContact);
+    const company = await hubspot.getAssociatedCompany(sampleDealId);
 
-      if (contactId === primaryContactId) {
-        if (existingTsEventId) {
-          console.log(`\n=== STEP 5: UPDATE existing TripleSeat event ${existingTsEventId} ===`);
-          const updated = await tripleseat.updateEvent(
-            existingTsEventId,
-            deal.properties,
-            tsContact.contact?.id,
-            sampleDealId,
-            tsOwnedById
-          );
-          console.log("Update response:", updated);
-          tsEventId = existingTsEventId;
-          console.log(`Event updated: ${tsEventId}`);
-        } else {
-          console.log("\n=== STEP 5: CREATE new TripleSeat event ===");
-          const tsEvent = await tripleseat.createEvent(
-            deal.properties,
-            tsContact.contact?.id,
-            sampleDealId,
-            tsOwnedById
-          );
-          console.log("Create response:", tsEvent);
-          tsEventId = tsEvent.event?.id;
-          console.log(`Event created: ${tsEventId}`);
-        }
+    if (company?.name) {
+      console.log(`Scenario 1 - primary/first associated company: "${company.name}" (domain: ${company.domain || "none"})`);
+      const existingAccount = await tripleseat.findAccountByName(company.name);
+      if (existingAccount) {
+        tsAccountId = existingAccount.id;
+        console.log(`Found existing Tripleseat account: ID=${tsAccountId}, name="${existingAccount.name}"`);
+      } else {
+        const newAccount = await tripleseat.createAccount(company.name, tsOwnedById, company.domain, company.phone);
+        tsAccountId = newAccount.id;
+        console.log(`Created new Tripleseat account: ID=${tsAccountId}, name="${company.name}", domain="${company.domain || "none"}", phone="${company.phone || "none"}"`);
       }
+    } else {
+      console.log(`Scenario 2 - no associated company, using primary contact name`);
+      cachedPrimaryContact = await hubspot.getContact(primaryContactId);
+      const firstName = cachedPrimaryContact.properties?.firstname || "";
+      const lastName = cachedPrimaryContact.properties?.lastname || "";
+      const accountName = `${firstName} ${lastName}`.trim() || `Contact ${primaryContactId}`;
+      console.log(`Account name derived from contact: "${accountName}"`);
+      const existingAccount = await tripleseat.findAccountByName(accountName);
+      if (existingAccount) {
+        tsAccountId = existingAccount.id;
+        console.log(`Found existing Tripleseat account: ID=${tsAccountId}, name="${existingAccount.name}"`);
+      } else {
+        const newAccount = await tripleseat.createAccount(accountName, tsOwnedById, null, cachedPrimaryContact.properties?.phone);
+        tsAccountId = newAccount.id;
+        console.log(`Created new Tripleseat account: ID=${tsAccountId}, name="${accountName}", phone="${cachedPrimaryContact.properties?.phone || "none"}"`);
+      }
+    }
+
+    console.log(`Resolved tsAccountId: ${tsAccountId}`);
+    // --------------------------------------------------
+
+    console.log(`\n=== STEP 4: Sync primary contact ${primaryContactId} ===`);
+    const contact = cachedPrimaryContact || await hubspot.getContact(primaryContactId);
+    console.log("Contact properties:", contact.properties);
+
+    const tsContact = await tripleseat.createContact(contact.properties, tsAccountId);
+    console.log("Tripleseat contact:", tsContact);
+
+    if (existingTsEventId) {
+      console.log(`\n=== STEP 5: UPDATE existing TripleSeat event ${existingTsEventId} ===`);
+      const updated = await tripleseat.updateEvent(
+        existingTsEventId,
+        deal.properties,
+        tsContact.contact?.id,
+        sampleDealId,
+        tsOwnedById,
+        tsAccountId
+      );
+      console.log("Update response:", updated);
+      tsEventId = existingTsEventId;
+      console.log(`Event updated: ${tsEventId}`);
+    } else {
+      console.log("\n=== STEP 5: CREATE new TripleSeat event ===");
+      const tsEvent = await tripleseat.createEvent(
+        deal.properties,
+        tsContact.contact?.id,
+        sampleDealId,
+        tsOwnedById,
+        tsAccountId
+      );
+      console.log("Create response:", tsEvent);
+      tsEventId = tsEvent.event?.id;
+      console.log(`Event created: ${tsEventId}`);
     }
 
     // Save tripleseat_event_id back to HubSpot only on first create

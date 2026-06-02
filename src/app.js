@@ -172,7 +172,7 @@ app.use((req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   logger.info("[SERVER_START] Server started successfully", {

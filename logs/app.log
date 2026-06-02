@@ -697,3 +697,385 @@
   "tripleseat_event_id": "60193086"
 }
   processingTime: 1340ms
+2026-06-02 11:26:34 [INFO] AUTH: Authentication service initialized
+  baseURL: https://api.tripleseat.com
+  hasClientId: true
+  hasClientSecret: true
+2026-06-02 11:26:34 [INFO] HUBSPOT: Fetching deal 211086501855
+2026-06-02 11:26:35 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211086501855
+  dealName: Dveloper event 2
+  dealStage: 2822434791
+  tripleseatPush: true
+  eventDate: 2026-05-30
+  guestCount: 11
+  leadSource: null
+  amount: 2222
+  tripleseatEventId: 
+  processingTime: 910ms
+2026-06-02 11:26:36 [INFO] AUTH: Requesting new OAuth2 access token (#1)
+2026-06-02 11:26:38 [INFO] AUTH: OAuth2 token obtained successfully
+  tokenLength: 43
+  expiresIn: 7200
+  processingTime: 1531ms
+  expiresAt: 6/2/2026, 12:16:38 PM
+2026-06-02 11:26:40 [INFO] TRIPLESEAT: User search raw response
+  email: kathryn.goddard@100kellogglane.com
+  topLevelKeys: [
+  "total_pages",
+  "results"
+]
+  isArray: false
+  rawPreview: {"total_pages":1,"results":[{"id":243298,"first_name":"Kathryn","last_name":"Goddard Tester","title":"Test User","email":"kathryn.goddard@100kellogglane.com","created_at":"11/5/2022 11:42 AM","updated_at":"10/19/2025 12:04 PM","login_count":5,"login_at":"10/19/2025 12:04 PM","customer_id":9905,"phone_numbers":[{"id":53915304,"number":"","phone_number_type":"Main","extension":"kgodd"}]}]}
+2026-06-02 11:26:40 [INFO] TRIPLESEAT: Found TripleSeat user for email kathryn.goddard@100kellogglane.com
+  userId: 243298
+2026-06-02 11:26:40 [INFO] HUBSPOT: Fetching associated contacts for deal 211086501855
+2026-06-02 11:26:41 [INFO] HUBSPOT: Found 1 associated contacts
+  dealId: 211086501855
+  contactIds: [
+  256416035792
+]
+  processingTime: 1053ms
+2026-06-02 11:26:41 [INFO] HUBSPOT: Fetching associated company for deal 211086501855
+2026-06-02 11:26:43 [INFO] HUBSPOT: Found associated company
+  dealId: 211086501855
+  companyId: 203408590789
+  companyName: Tea From The Heart
+2026-06-02 11:26:43 [INFO] AUTH: Using cached token (expires in 2995s)
+2026-06-02 11:26:44 [INFO] TRIPLESEAT: Account search response
+  name: Tea From The Heart
+  topLevelKeys: [
+  "total_pages",
+  "results"
+]
+  rawPreview: {"total_pages":0,"results":[]}
+2026-06-02 11:26:44 [INFO] TRIPLESEAT: No existing Tripleseat account found for name: Tea From The Heart
+2026-06-02 11:26:44 [INFO] AUTH: Using cached token (expires in 2993s)
+2026-06-02 11:26:47 [INFO] TRIPLESEAT: Tripleseat account created
+  name: Tea From The Heart
+  accountId: 44486138
+2026-06-02 11:26:47 [INFO] HUBSPOT: Fetching contact 256416035792
+  properties: [
+  "firstname",
+  "lastname",
+  "email",
+  "phone",
+  "company",
+  "jobtitle"
+]
+2026-06-02 11:26:48 [INFO] HUBSPOT: Contact retrieved successfully
+  contactId: 256416035792
+  email: developer123@gmail.com
+  name: Developer test
+  processingTime: 963ms
+2026-06-02 11:26:48 [INFO] TRIPLESEAT: Searching for existing contact: developer123@gmail.com
+  accountId: 43553180
+2026-06-02 11:26:48 [INFO] AUTH: Using cached token (expires in 2990s)
+2026-06-02 11:26:49 [INFO] TRIPLESEAT: Contact search response keys
+  email: developer123@gmail.com
+  topLevelKeys: [
+  "total_pages",
+  "results"
+]
+  isArray: false
+  rawPreview: {"total_pages":1,"results":[{"id":58949442,"first_name":"Developer","last_name":"test","account_id":43553180,"customer_id":9905,"site_id":10627,"title":null,"contact_type":null,"email_opt_in":false,"owned_by":207142,"description":null,"twitter_account":null,"facebook_account":null,"instagram_account":null,"linkedin_account":null,"created_at":"6/1/2026 2:30 AM","updated_at":"6/1/2026 2:30 AM","deleted_at":null,"email_addresses":[{"id":60160405,"address":"developer123@gmail.com"}],"phone_numbers":[{"id":107460597,"number":"+15222565956","phone_number_type":"Work","extension":null}],"websites":[{
+2026-06-02 11:26:49 [INFO] TRIPLESEAT: Contact search parsed
+  email: developer123@gmail.com
+  totalFound: 1
+2026-06-02 11:26:49 [INFO] TRIPLESEAT: Found existing contact
+  email: developer123@gmail.com
+  contactId: 58949442
+  totalFound: 1
+  processingTime: 998ms
+2026-06-02 11:26:49 [INFO] AUTH: Using cached token (expires in 2989s)
+2026-06-02 11:26:49 [INFO] TRIPLESEAT: Updating existing contact for developer123@gmail.com
+  contactId: 58949442
+  existingEmailId: 60160405
+  existingPhoneId: 107460597
+2026-06-02 11:26:50 [INFO] TRIPLESEAT: Contact updated successfully
+  email: developer123@gmail.com
+  tripleseatContactId: 58949442
+  processingTime: 1931ms
+2026-06-02 11:26:50 [INFO] TRIPLESEAT: Creating event for deal: Dveloper event 2
+  contactId: 58949442
+  hubspotDealId: 211086501855
+  dealStage: 2822434791
+  eventDate: 2026-05-30
+  guestCount: 11
+  leadSource: none
+  amount: 2222
+2026-06-02 11:26:50 [INFO] AUTH: Using cached token (expires in 2988s)
+2026-06-02 11:26:52 [INFO] TRIPLESEAT: Event created successfully
+  eventName: Dveloper event 2
+  tripleseatEventId: 60228458
+  eventDates: 05/30/2026 11:26 AM - 05/30/2026 12:26 PM
+  grandTotal: 2222
+  hubspotDealId: 211086501855
+  processingTime: 2035ms
+2026-06-02 11:26:52 [INFO] HUBSPOT: Updating deal 211086501855
+  properties: {
+  "tripleseat_event_id": "60228458"
+}
+2026-06-02 11:26:53 [INFO] HUBSPOT: Deal updated successfully
+  dealId: 211086501855
+  properties: {
+  "tripleseat_event_id": "60228458"
+}
+  processingTime: 1090ms
+2026-06-02 11:50:43 [INFO] AUTH: Authentication service initialized
+  baseURL: https://api.tripleseat.com
+  hasClientId: true
+  hasClientSecret: true
+2026-06-02 11:50:43 [INFO] HUBSPOT: Fetching deal 211086501855
+2026-06-02 11:50:46 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211086501855
+  dealName: Dveloper event 2
+  dealStage: 2822434791
+  tripleseatPush: true
+  eventDate: 2026-05-30
+  guestCount: 11
+  leadSource: null
+  amount: 2222
+  tripleseatEventId: 
+  processingTime: 2630ms
+2026-06-02 11:50:47 [INFO] AUTH: Requesting new OAuth2 access token (#1)
+2026-06-02 11:50:48 [INFO] AUTH: OAuth2 token obtained successfully
+  tokenLength: 43
+  expiresIn: 7200
+  processingTime: 929ms
+  expiresAt: 6/2/2026, 12:40:48 PM
+2026-06-02 11:50:50 [INFO] TRIPLESEAT: User search raw response
+  email: kathryn.goddard@100kellogglane.com
+  topLevelKeys: [
+  "total_pages",
+  "results"
+]
+  isArray: false
+  rawPreview: {"total_pages":1,"results":[{"id":243298,"first_name":"Kathryn","last_name":"Goddard Tester","title":"Test User","email":"kathryn.goddard@100kellogglane.com","created_at":"11/5/2022 11:42 AM","updated_at":"10/19/2025 12:04 PM","login_count":5,"login_at":"10/19/2025 12:04 PM","customer_id":9905,"phone_numbers":[{"id":53915304,"number":"","phone_number_type":"Main","extension":"kgodd"}]}]}
+2026-06-02 11:50:50 [INFO] TRIPLESEAT: Found TripleSeat user for email kathryn.goddard@100kellogglane.com
+  userId: 243298
+2026-06-02 11:50:50 [INFO] HUBSPOT: Fetching associated contacts for deal 211086501855
+2026-06-02 11:50:51 [INFO] HUBSPOT: Found 2 associated contacts
+  dealId: 211086501855
+  contactIds: [
+  256416035792,
+  256908050413
+]
+  processingTime: 710ms
+2026-06-02 11:50:51 [INFO] HUBSPOT: Fetching associated company for deal 211086501855
+2026-06-02 11:50:52 [INFO] HUBSPOT: Found associated company
+  dealId: 211086501855
+  companyId: 203408590789
+  companyName: Tea From The Heart
+  isPrimary: true
+  totalAssociated: 2
+2026-06-02 11:50:52 [INFO] AUTH: Using cached token (expires in 2996s)
+2026-06-02 11:50:53 [INFO] TRIPLESEAT: Account search response
+  name: Tea From The Heart
+  topLevelKeys: [
+  "total_pages",
+  "results"
+]
+  rawPreview: {"total_pages":1,"results":[{"id":44486138,"name":"Tea From The Heart","description":null,"owned_by":243298,"created_at":"6/2/2026 1:56 AM","updated_at":"6/2/2026 1:56 AM","deleted_at":null,"customer_id":9905,"site_id":10627,"websites":[{"id":103768766,"url":""}],"market_segment":null,"phone_numbers":[{"id":107516390,"number":null,"phone_number_type":null,"extension":null}],"addresses":[{"id":148035824,"address1":null,"address2":null,"city":null,"state":null,"country":null,"zip_code":null,"address_type":"Main"}],"custom_fields":[]}]}
+2026-06-02 11:50:53 [INFO] TRIPLESEAT: Found existing Tripleseat account
+  name: Tea From The Heart
+  accountId: 44486138
+2026-06-02 11:50:53 [INFO] HUBSPOT: Fetching contact 256416035792
+  properties: [
+  "firstname",
+  "lastname",
+  "email",
+  "phone",
+  "company",
+  "jobtitle"
+]
+2026-06-02 11:50:54 [INFO] HUBSPOT: Contact retrieved successfully
+  contactId: 256416035792
+  email: developer123@gmail.com
+  name: Developer test
+  processingTime: 842ms
+2026-06-02 11:50:54 [INFO] TRIPLESEAT: Searching for existing contact: developer123@gmail.com
+  accountId: 43553180
+2026-06-02 11:50:54 [INFO] AUTH: Using cached token (expires in 2994s)
+2026-06-02 11:50:55 [INFO] TRIPLESEAT: Contact search response keys
+  email: developer123@gmail.com
+  topLevelKeys: [
+  "total_pages",
+  "results"
+]
+  isArray: false
+  rawPreview: {"total_pages":1,"results":[{"id":58949442,"first_name":"Developer","last_name":"test","account_id":44486138,"customer_id":9905,"site_id":10627,"title":null,"contact_type":null,"email_opt_in":false,"owned_by":207142,"description":null,"twitter_account":null,"facebook_account":null,"instagram_account":null,"linkedin_account":null,"created_at":"6/1/2026 2:30 AM","updated_at":"6/2/2026 1:56 AM","deleted_at":null,"email_addresses":[{"id":60160405,"address":"developer123@gmail.com"}],"phone_numbers":[{"id":107460597,"number":"+15222565956","phone_number_type":"Work","extension":null}],"websites":[{
+2026-06-02 11:50:55 [INFO] TRIPLESEAT: Contact search parsed
+  email: developer123@gmail.com
+  totalFound: 1
+2026-06-02 11:50:55 [INFO] TRIPLESEAT: Found existing contact
+  email: developer123@gmail.com
+  contactId: 58949442
+  totalFound: 1
+  processingTime: 961ms
+2026-06-02 11:50:55 [INFO] AUTH: Using cached token (expires in 2993s)
+2026-06-02 11:50:55 [INFO] TRIPLESEAT: Updating existing contact for developer123@gmail.com
+  contactId: 58949442
+  existingEmailId: 60160405
+  existingPhoneId: 107460597
+2026-06-02 11:50:56 [INFO] TRIPLESEAT: Contact updated successfully
+  email: developer123@gmail.com
+  tripleseatContactId: 58949442
+  processingTime: 1850ms
+2026-06-02 11:50:56 [INFO] TRIPLESEAT: Creating event for deal: Dveloper event 2
+  contactId: 58949442
+  hubspotDealId: 211086501855
+  dealStage: 2822434791
+  eventDate: 2026-05-30
+  guestCount: 11
+  leadSource: none
+  amount: 2222
+2026-06-02 11:50:56 [INFO] AUTH: Using cached token (expires in 2992s)
+2026-06-02 11:50:57 [INFO] TRIPLESEAT: Event created successfully
+  eventName: Dveloper event 2
+  tripleseatEventId: 60228539
+  eventDates: 05/30/2026 11:50 AM - 05/30/2026 12:50 PM
+  grandTotal: 2222
+  hubspotDealId: 211086501855
+  processingTime: 1263ms
+2026-06-02 11:50:57 [INFO] HUBSPOT: Updating deal 211086501855
+  properties: {
+  "tripleseat_event_id": "60228539"
+}
+2026-06-02 11:50:58 [INFO] HUBSPOT: Deal updated successfully
+  dealId: 211086501855
+  properties: {
+  "tripleseat_event_id": "60228539"
+}
+  processingTime: 873ms
+2026-06-02 12:02:45 [INFO] AUTH: Authentication service initialized
+  baseURL: https://api.tripleseat.com
+  hasClientId: true
+  hasClientSecret: true
+2026-06-02 12:02:45 [INFO] HUBSPOT: Fetching deal 211086501855
+2026-06-02 12:02:46 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211086501855
+  dealName: Dveloper event 2
+  dealStage: 2822434791
+  tripleseatPush: true
+  eventDate: 2026-05-30
+  guestCount: 11
+  leadSource: null
+  amount: 2222
+  tripleseatEventId: 
+  processingTime: 854ms
+2026-06-02 12:02:47 [INFO] AUTH: Requesting new OAuth2 access token (#1)
+2026-06-02 12:02:48 [INFO] AUTH: OAuth2 token obtained successfully
+  tokenLength: 43
+  expiresIn: 7199
+  processingTime: 755ms
+  expiresAt: 6/2/2026, 12:52:48 PM
+2026-06-02 12:02:49 [INFO] TRIPLESEAT: User search raw response
+  email: kathryn.goddard@100kellogglane.com
+  topLevelKeys: [
+  "total_pages",
+  "results"
+]
+  isArray: false
+  rawPreview: {"total_pages":1,"results":[{"id":243298,"first_name":"Kathryn","last_name":"Goddard Tester","title":"Test User","email":"kathryn.goddard@100kellogglane.com","created_at":"11/5/2022 11:42 AM","updated_at":"10/19/2025 12:04 PM","login_count":5,"login_at":"10/19/2025 12:04 PM","customer_id":9905,"phone_numbers":[{"id":53915304,"number":"","phone_number_type":"Main","extension":"kgodd"}]}]}
+2026-06-02 12:02:49 [INFO] TRIPLESEAT: Found TripleSeat user for email kathryn.goddard@100kellogglane.com
+  userId: 243298
+2026-06-02 12:02:49 [INFO] HUBSPOT: Fetching associated contacts for deal 211086501855
+2026-06-02 12:02:50 [INFO] HUBSPOT: Found 1 associated contacts
+  dealId: 211086501855
+  contactIds: [
+  256908050413
+]
+  processingTime: 669ms
+2026-06-02 12:02:50 [INFO] HUBSPOT: Fetching associated company for deal 211086501855
+2026-06-02 12:02:51 [INFO] HUBSPOT: No company associated with deal 211086501855
+2026-06-02 12:02:51 [INFO] HUBSPOT: Fetching contact 256908050413
+  properties: [
+  "firstname",
+  "lastname",
+  "email",
+  "phone",
+  "company",
+  "jobtitle"
+]
+2026-06-02 12:02:52 [INFO] HUBSPOT: Contact retrieved successfully
+  contactId: 256908050413
+  email: trooinbound@gmail.com
+  name: test developer
+  processingTime: 625ms
+2026-06-02 12:02:52 [INFO] AUTH: Using cached token (expires in 2996s)
+2026-06-02 12:02:52 [INFO] TRIPLESEAT: Account search response
+  name: test developer
+  topLevelKeys: [
+  "total_pages",
+  "results"
+]
+  rawPreview: {"total_pages":0,"results":[]}
+2026-06-02 12:02:52 [INFO] TRIPLESEAT: No existing Tripleseat account found for name: test developer
+2026-06-02 12:02:52 [INFO] AUTH: Using cached token (expires in 2995s)
+2026-06-02 12:02:54 [INFO] TRIPLESEAT: Tripleseat account created
+  name: test developer
+  accountId: 44486191
+2026-06-02 12:02:54 [INFO] TRIPLESEAT: Searching for existing contact: trooinbound@gmail.com
+  accountId: 43553180
+2026-06-02 12:02:54 [INFO] AUTH: Using cached token (expires in 2994s)
+2026-06-02 12:02:55 [INFO] TRIPLESEAT: Contact search response keys
+  email: trooinbound@gmail.com
+  topLevelKeys: [
+  "total_pages",
+  "results"
+]
+  isArray: false
+  rawPreview: {"total_pages":0,"results":[]}
+2026-06-02 12:02:55 [INFO] TRIPLESEAT: Contact search parsed
+  email: trooinbound@gmail.com
+  totalFound: 0
+2026-06-02 12:02:55 [INFO] TRIPLESEAT: No existing contact found
+  email: trooinbound@gmail.com
+  processingTime: 951ms
+2026-06-02 12:02:55 [INFO] AUTH: Using cached token (expires in 2993s)
+2026-06-02 12:02:55 [INFO] TRIPLESEAT: Creating new contact for trooinbound@gmail.com
+  name: test developer
+  phone: +12262687843
+  accountId: 44486191
+2026-06-02 12:02:55 [INFO] TRIPLESEAT: Contact created successfully
+  email: trooinbound@gmail.com
+  tripleseatContactId: 58981290
+  processingTime: 1926ms
+2026-06-02 12:02:55 [INFO] TRIPLESEAT: Creating event for deal: Dveloper event 2
+  contactId: 58981290
+  hubspotDealId: 211086501855
+  dealStage: 2822434791
+  eventDate: 2026-05-30
+  guestCount: 11
+  leadSource: none
+  amount: 2222
+2026-06-02 12:02:55 [INFO] AUTH: Using cached token (expires in 2992s)
+2026-06-02 12:02:57 [INFO] TRIPLESEAT: Event created successfully
+  eventName: Dveloper event 2
+  tripleseatEventId: 60228575
+  eventDates: 05/30/2026 12:02 PM - 05/30/2026 1:02 PM
+  grandTotal: 2222
+  hubspotDealId: 211086501855
+  processingTime: 1264ms
+2026-06-02 12:02:57 [INFO] HUBSPOT: Updating deal 211086501855
+  properties: {
+  "tripleseat_event_id": "60228575"
+}
+2026-06-02 12:02:58 [INFO] HUBSPOT: Deal updated successfully
+  dealId: 211086501855
+  properties: {
+  "tripleseat_event_id": "60228575"
+}
+  processingTime: 1597ms
+2026-06-02 12:20:58 [INFO] AUTH: Authentication service initialized
+  baseURL: https://api.tripleseat.com
+  hasClientId: true
+  hasClientSecret: true
+2026-06-02 12:20:58 [INFO] [SERVER_START] Server started successfully
+  port: 8080
+  environment: development
+  nodeVersion: v18.20.8
+  platform: linux
+  pid: 158815
+2026-06-02 12:24:30 [INFO] [SERVER_SHUTDOWN] SIGINT received, shutting down gracefully
