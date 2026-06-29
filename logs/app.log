@@ -1079,3 +1079,11 @@
   platform: linux
   pid: 158815
 2026-06-02 12:24:30 [INFO] [SERVER_SHUTDOWN] SIGINT received, shutting down gracefully
+2026-06-29 13:19:12 [INFO] AUTH: Authentication service initialized
+  baseURL: undefined
+  hasClientId: false
+  hasClientSecret: false
+2026-06-29 13:19:21 [INFO] AUTH: Authentication service initialized
+  baseURL: undefined
+  hasClientId: false
+  hasClientSecret: false

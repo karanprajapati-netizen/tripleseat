@@ -492,6 +492,12 @@ exports.updateEvent = async (tsEventId, deal, contactId, hubspotDealId, ownedByI
     const guestCount = deal.number_of_guests__cloned__ ? parseInt(deal.number_of_guests__cloned__) : null;
     const leadSources = deal.lead_source ? [deal.lead_source] : [];
 
+    const preservedRoomIds = (existingEvent.room_ids && existingEvent.room_ids.length)
+      ? existingEvent.room_ids
+      : [238254];
+    const preservedOwnedBy = existingEvent.owned_by || ownedById;
+    const preservedLocationId = existingEvent.location_id || 20271;
+
     const payload = {
       name: deal.dealname || "Event from HubSpot",
       status: mapDealStageToEventStatus(deal.dealstage),
@@ -500,9 +506,9 @@ exports.updateEvent = async (tsEventId, deal, contactId, hubspotDealId, ownedByI
       event_date: tsEventDate,
       event_start: eventStart,
       event_end: eventEnd,
-      location_id: 20271,
-      room_ids: [238254],
-      owned_by: ownedById,
+      location_id: preservedLocationId,
+      room_ids: preservedRoomIds,
+      owned_by: preservedOwnedBy,
       description: deal.event_details || "",
       ...(dealAmount ? { actual_amount: dealAmount } : {}),
       ...(guestCount ? { guest_count: guestCount } : {}),
