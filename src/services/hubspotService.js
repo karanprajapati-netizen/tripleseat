@@ -73,6 +73,22 @@ exports.getAssociatedDeals = async (contactId) => {
   }
 };
 
+// Get all deal pipelines with their stages (cached, since pipelines rarely change)
+let pipelinesCache = null;
+let pipelinesCacheExpiry = 0;
+const PIPELINES_CACHE_TTL_MS = 10 * 60 * 1000;
+
+exports.getPipelines = async (now = Date.now()) => {
+  if (pipelinesCache && now < pipelinesCacheExpiry) {
+    return pipelinesCache;
+  }
+
+  const res = await axios.get(`${BASE_URL}/crm/v3/pipelines/deals`, { headers });
+  pipelinesCache = res.data.results;
+  pipelinesCacheExpiry = now + PIPELINES_CACHE_TTL_MS;
+  return pipelinesCache;
+};
+
 // Get Deal
 exports.getDeal = async (dealId) => {
   const startTime = Date.now();
@@ -81,7 +97,7 @@ exports.getDeal = async (dealId) => {
     logger.hubspot(`Fetching deal ${dealId}`);
     
     const res = await axios.get(
-      `${BASE_URL}/crm/v3/objects/deals/${dealId}?properties=dealname,dealstage,tripleseat_push,event_date,amount,tripleseat_event_id,number_of_guests__cloned__,lead_source,event_details,hubspot_owner_id`,
+      `${BASE_URL}/crm/v3/objects/deals/${dealId}?properties=dealname,dealstage,pipeline,tripleseat_push,event_date,amount,tripleseat_event_id,number_of_guests__cloned__,lead_source,event_details,hubspot_owner_id`,
       { headers }
     );
 
@@ -126,7 +142,7 @@ exports.findDealByTripleseatEventId = async (tripleseatEventId) => {
             value: String(tripleseatEventId)
           }]
         }],
-        properties: ["dealname", "dealstage", "amount", "tripleseat_event_id", "event_date", "number_of_guests__cloned__", "event_details"]
+        properties: ["dealname", "dealstage", "pipeline", "amount", "tripleseat_event_id", "event_date", "number_of_guests__cloned__", "event_details"]
       },
       { headers }
     );

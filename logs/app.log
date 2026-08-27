@@ -1087,3 +1087,205 @@
   baseURL: undefined
   hasClientId: false
   hasClientSecret: false
+2026-08-27 09:49:22 [INFO] HUBSPOT: Fetching deal 211317495776
+2026-08-27 09:49:23 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211317495776
+  dealName: Dveloper event (clone)1
+  dealStage: 2822434794
+  tripleseatPush: true
+  eventDate: 2026-05-31
+  guestCount: 11
+  leadSource: null
+  amount: 2222
+  tripleseatEventId: 
+  processingTime: 662ms
+2026-08-27 09:49:42 [INFO] HUBSPOT: Fetching deal 211317495776
+2026-08-27 09:49:43 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211317495776
+  dealName: Dveloper event (clone)1
+  dealStage: 2822434794
+  tripleseatPush: true
+  eventDate: 2026-05-31
+  guestCount: 11
+  leadSource: null
+  amount: 2222
+  tripleseatEventId: 
+  processingTime: 560ms
+2026-08-27 09:52:13 [INFO] HUBSPOT: Fetching deal 211317495776
+2026-08-27 09:52:14 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211317495776
+  dealName: Dveloper event (clone)1
+  dealStage: 2822434794
+  tripleseatPush: true
+  eventDate: 2026-05-31
+  guestCount: 11
+  leadSource: null
+  amount: 2222
+  tripleseatEventId: 
+  processingTime: 781ms
+2026-08-27 09:52:34 [INFO] HUBSPOT: Fetching deal 211317495776
+2026-08-27 09:52:34 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211317495776
+  dealName: Dveloper event (clone)1
+  dealStage: 3679912895
+  tripleseatPush: true
+  eventDate: 2026-05-31
+  guestCount: 11
+  leadSource: null
+  amount: 2222
+  tripleseatEventId: 
+  processingTime: 641ms
+2026-08-27 09:52:48 [INFO] HUBSPOT: Fetching deal 211317495776
+2026-08-27 09:52:48 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211317495776
+  dealName: Dveloper event (clone)1
+  dealStage: 3679912902
+  tripleseatPush: true
+  eventDate: 2026-05-31
+  guestCount: 11
+  leadSource: null
+  amount: 2222
+  tripleseatEventId: 
+  processingTime: 699ms
+2026-08-27 09:52:49 [INFO] HUBSPOT: Updating deal 211317495776
+  properties: {
+  "dealstage": "3679912895"
+}
+2026-08-27 09:52:50 [INFO] HUBSPOT: Deal updated successfully
+  dealId: 211317495776
+  properties: {
+  "dealstage": "3679912895"
+}
+  processingTime: 609ms
+2026-08-27 09:54:46 [INFO] HUBSPOT: Updating deal 211317495776
+  properties: {
+  "tripleseat_event_id": "TESTRUN-211317495776"
+}
+2026-08-27 09:54:47 [INFO] HUBSPOT: Deal updated successfully
+  dealId: 211317495776
+  properties: {
+  "tripleseat_event_id": "TESTRUN-211317495776"
+}
+  processingTime: 812ms
+2026-08-27 09:54:47 [INFO] HUBSPOT: Fetching deal 211317495776
+2026-08-27 09:54:47 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211317495776
+  dealName: Dveloper event (clone)1
+  dealStage: 3679912900
+  tripleseatPush: true
+  eventDate: 2026-05-31
+  guestCount: 11
+  leadSource: null
+  amount: 2222
+  tripleseatEventId: TESTRUN-211317495776
+  processingTime: 579ms
+2026-08-27 09:54:47 [INFO] TRIPLESEAT: TripleSeat webhook received
+  rawPayload: {"event":{"id":"TESTRUN-211317495776","status":"PROSPECT"}}
+2026-08-27 09:54:47 [INFO] TRIPLESEAT: Parsed event data
+  eventData: {"id":"TESTRUN-211317495776","status":"PROSPECT"}
+2026-08-27 09:54:47 [INFO] TRIPLESEAT: Extracted TripleSeat event ID
+  tsEventId: TESTRUN-211317495776
+2026-08-27 09:54:47 [INFO] HUBSPOT: Searching deal by tripleseat_event_id: TESTRUN-211317495776
+2026-08-27 09:54:48 [INFO] HUBSPOT: No deal found for tripleseat_event_id: TESTRUN-211317495776
+  processingTime: 603ms
+2026-08-27 09:54:48 [INFO] TRIPLESEAT: No linked HubSpot deal found - skipping
+  tsEventId: TESTRUN-211317495776
+2026-08-27 09:54:48 [INFO] HUBSPOT: Fetching deal 211317495776
+2026-08-27 09:54:48 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211317495776
+  dealName: Dveloper event (clone)1
+  dealStage: 3679912900
+  tripleseatPush: true
+  eventDate: 2026-05-31
+  guestCount: 11
+  leadSource: null
+  amount: 2222
+  tripleseatEventId: TESTRUN-211317495776
+  processingTime: 575ms
+2026-08-27 09:54:48 [INFO] HUBSPOT: Updating deal 211317495776
+  properties: {
+  "tripleseat_event_id": ""
+}
+2026-08-27 09:54:49 [INFO] HUBSPOT: Deal updated successfully
+  dealId: 211317495776
+  properties: {
+  "tripleseat_event_id": ""
+}
+  processingTime: 606ms
+2026-08-27 09:55:01 [INFO] HUBSPOT: Updating deal 211317495776
+  properties: {
+  "tripleseat_event_id": "TESTRUN-211317495776"
+}
+2026-08-27 09:55:02 [INFO] HUBSPOT: Deal updated successfully
+  dealId: 211317495776
+  properties: {
+  "tripleseat_event_id": "TESTRUN-211317495776"
+}
+  processingTime: 724ms
+2026-08-27 09:55:10 [INFO] HUBSPOT: Fetching deal 211317495776
+2026-08-27 09:55:11 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211317495776
+  dealName: Dveloper event (clone)1
+  dealStage: 3679912900
+  tripleseatPush: true
+  eventDate: 2026-05-31
+  guestCount: 11
+  leadSource: null
+  amount: 2222
+  tripleseatEventId: TESTRUN-211317495776
+  processingTime: 573ms
+2026-08-27 09:55:11 [INFO] TRIPLESEAT: TripleSeat webhook received
+  rawPayload: {"event":{"id":"TESTRUN-211317495776","status":"PROSPECT"}}
+2026-08-27 09:55:11 [INFO] TRIPLESEAT: Parsed event data
+  eventData: {"id":"TESTRUN-211317495776","status":"PROSPECT"}
+2026-08-27 09:55:11 [INFO] TRIPLESEAT: Extracted TripleSeat event ID
+  tsEventId: TESTRUN-211317495776
+2026-08-27 09:55:11 [INFO] HUBSPOT: Searching deal by tripleseat_event_id: TESTRUN-211317495776
+2026-08-27 09:55:11 [INFO] HUBSPOT: Deal found for tripleseat_event_id: TESTRUN-211317495776
+  dealId: 211317495776
+  dealName: Dveloper event (clone)1
+  processingTime: 561ms
+2026-08-27 09:55:12 [INFO] TRIPLESEAT: Mapping TripleSeat status to HubSpot stage
+  tsStatus: PROSPECT
+  stageLabel: Qualified Lead
+  mappedStage: 3679912895
+  currentPipelineId: 2169949127
+  dealId: 211317495776
+2026-08-27 09:55:12 [INFO] HUBSPOT: Updating deal 211317495776
+  properties: {
+  "dealstage": "3679912895"
+}
+2026-08-27 09:55:14 [INFO] HUBSPOT: Deal updated successfully
+  dealId: 211317495776
+  properties: {
+  "dealstage": "3679912895"
+}
+  processingTime: 1386ms
+2026-08-27 09:55:14 [INFO] TRIPLESEAT: HubSpot deal updated from TripleSeat webhook
+  dealId: 211317495776
+  updates: {
+  "dealstage": "3679912895"
+}
+  tsEventId: TESTRUN-211317495776
+2026-08-27 09:55:14 [INFO] HUBSPOT: Fetching deal 211317495776
+2026-08-27 09:55:14 [INFO] HUBSPOT: Deal retrieved successfully
+  dealId: 211317495776
+  dealName: Dveloper event (clone)1
+  dealStage: 3679912895
+  tripleseatPush: true
+  eventDate: 2026-05-31
+  guestCount: 11
+  leadSource: null
+  amount: 2222
+  tripleseatEventId: TESTRUN-211317495776
+  processingTime: 516ms
+2026-08-27 09:55:14 [INFO] HUBSPOT: Updating deal 211317495776
+  properties: {
+  "tripleseat_event_id": ""
+}
+2026-08-27 09:55:15 [INFO] HUBSPOT: Deal updated successfully
+  dealId: 211317495776
+  properties: {
+  "tripleseat_event_id": ""
+}
+  processingTime: 736ms

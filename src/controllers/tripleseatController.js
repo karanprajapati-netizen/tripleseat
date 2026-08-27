@@ -27,14 +27,29 @@ const verifySignature = (rawBody, signatureHeader) => {
   );
 };
 
-// TripleSeat status → HubSpot deal stage ID mapping (Event Sales Pipeline)
-const TS_STATUS_TO_HS_STAGE = {
-  PROSPECT:  process.env.HS_STAGE_PROSPECT  || "2822434791", // Qualified Lead
-  TENTATIVE: process.env.HS_STAGE_TENTATIVE || "2822434793", // Contract Sent (highest pre-deposit stage)
-  DEFINITE:  process.env.HS_STAGE_DEFINITE  || "2822434794", // Closed Won (deposit received)
-  CLOSED:    process.env.HS_STAGE_CLOSED    || "2822434794", // Closed Won (final numbers updated)
-  LOST:      process.env.HS_STAGE_LOST      || "2822434795", // Closed Lost
-  WAITLIST:  process.env.HS_STAGE_WAITLIST  || "2822434791"  // Qualified Lead
+// TripleSeat status → HubSpot deal stage LABEL (resolved to a stage ID per the deal's current pipeline)
+const TS_STATUS_TO_STAGE_LABEL = {
+  PROSPECT:  "Qualified Lead",
+  TENTATIVE: "Contract Sent",
+  DEFINITE:  "Closed Won",
+  CLOSED:    "Closed Won",
+  LOST:      "Closed Lost",
+  WAITLIST:  "Qualified Lead"
+};
+
+// Some pipelines use a slightly different label for the same stage
+const STAGE_LABEL_ALIASES = {
+  "Qualified Lead": ["Qualified"]
+};
+
+// Resolve the correct stage ID for a status within the deal's own pipeline (no hardcoded pipeline assumption)
+const resolveStageId = (pipelines, pipelineId, stageLabel) => {
+  const pipeline = pipelines.find(p => p.id === pipelineId);
+  if (!pipeline) return null;
+
+  const candidates = [stageLabel, ...(STAGE_LABEL_ALIASES[stageLabel] || [])];
+  const stage = pipeline.stages.find(s => candidates.includes(s.label));
+  return stage ? stage.id : null;
 };
 
 
@@ -93,11 +108,21 @@ exports.handleWebhook = async (req, res) => {
     // Triggered by: Status Change Event, Update Event
     // --------------------------------------------------
     const tsStatus = (eventData.status || "").toUpperCase();
-    if (tsStatus && TS_STATUS_TO_HS_STAGE[tsStatus]) {
-      const mappedStage = TS_STATUS_TO_HS_STAGE[tsStatus];
-      if (deal.properties?.dealstage !== mappedStage) {
+    const stageLabel = TS_STATUS_TO_STAGE_LABEL[tsStatus];
+    if (stageLabel) {
+      const pipelines = await hubspot.getPipelines();
+      const currentPipelineId = deal.properties?.pipeline;
+      const mappedStage = resolveStageId(pipelines, currentPipelineId, stageLabel);
+
+      if (!mappedStage) {
+        logger.error("No matching stage found for deal's pipeline - skipping dealstage update", {
+          dealId, tsStatus, stageLabel, currentPipelineId
+        });
+      } else if (deal.properties?.dealstage !== mappedStage) {
         updates.dealstage = mappedStage;
-        logger.tripleseat("Mapping TripleSeat status to HubSpot stage", { tsStatus, mappedStage, dealId });
+        logger.tripleseat("Mapping TripleSeat status to HubSpot stage", {
+          tsStatus, stageLabel, mappedStage, currentPipelineId, dealId
+        });
       }
     }
 
